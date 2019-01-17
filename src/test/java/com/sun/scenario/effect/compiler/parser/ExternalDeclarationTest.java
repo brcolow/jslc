@@ -49,9 +49,9 @@ public class ExternalDeclarationTest extends ParserBase {
         VarDecl d = (VarDecl)tree;
         Variable var = d.getVariable();
         assertNotNull(var);
-        assertEquals(var.getQualifier(), Qualifier.PARAM);
-        assertEquals(var.getType(), Type.FLOAT4);
-        assertEquals(var.getName(), "foo");
+        assertEquals(Qualifier.PARAM, var.getQualifier());
+        assertEquals(Type.FLOAT4, var.getType());
+        assertEquals("foo", var.getName());
         assertNull(d.getInit());
     }
 

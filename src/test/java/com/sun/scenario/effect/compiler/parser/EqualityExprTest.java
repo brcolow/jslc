@@ -28,7 +28,10 @@ package com.sun.scenario.effect.compiler.parser;
 import com.sun.scenario.effect.compiler.JSLParser;
 import com.sun.scenario.effect.compiler.model.BinaryOpType;
 import com.sun.scenario.effect.compiler.model.Type;
+import com.sun.scenario.effect.compiler.model.Variable;
 import com.sun.scenario.effect.compiler.tree.BinaryExpr;
+import com.sun.scenario.effect.compiler.tree.LiteralExpr;
+import com.sun.scenario.effect.compiler.tree.VariableExpr;
 import org.antlr.runtime.RecognitionException;
 import org.junit.Test;
 
@@ -40,12 +43,28 @@ public class EqualityExprTest extends ParserBase {
     public void oneEq() throws Exception {
         BinaryExpr tree = parseTreeFor("foo == 3");
         assertEquals(tree.getOp(), BinaryOpType.EQEQ);
+        assertEquals(Type.INT, tree.getLeft().getResultType());
+        assertEquals(VariableExpr.class, tree.getLeft().getClass());
+        Variable var = ((VariableExpr) tree.getLeft()).getVariable();
+        assertEquals("foo", var.getName());
+        assertEquals(Type.INT, var.getType());
+        assertEquals(LiteralExpr.class, tree.getRight().getClass());
+        Object val = ((LiteralExpr) tree.getRight()).getValue();
+        assertEquals(3, val);
     }
 
     @Test
     public void oneNotEq() throws Exception {
         BinaryExpr tree = parseTreeFor("foo != 3");
         assertEquals(tree.getOp(), BinaryOpType.NEQ);
+        assertEquals(Type.INT, tree.getLeft().getResultType());
+        assertEquals(VariableExpr.class, tree.getLeft().getClass());
+        Variable var = ((VariableExpr) tree.getLeft()).getVariable();
+        assertEquals("foo", var.getName());
+        assertEquals(Type.INT, var.getType());
+        assertEquals(LiteralExpr.class, tree.getRight().getClass());
+        Object val = ((LiteralExpr) tree.getRight()).getValue();
+        assertEquals(3, val);
     }
 
     @Test(expected = RecognitionException.class)

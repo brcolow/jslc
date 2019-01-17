@@ -26,16 +26,12 @@
 package com.sun.scenario.effect.compiler.parser;
 
 import com.sun.scenario.effect.compiler.JSLParser;
-import com.sun.scenario.effect.compiler.model.BinaryOpType;
-import com.sun.scenario.effect.compiler.model.Qualifier;
-import com.sun.scenario.effect.compiler.model.SymbolTable;
-import com.sun.scenario.effect.compiler.model.Type;
-import com.sun.scenario.effect.compiler.tree.BinaryExpr;
-import com.sun.scenario.effect.compiler.tree.LiteralExpr;
-import com.sun.scenario.effect.compiler.tree.VariableExpr;
-import com.sun.scenario.effect.compiler.tree.VectorCtorExpr;
+import com.sun.scenario.effect.compiler.model.*;
+import com.sun.scenario.effect.compiler.tree.*;
 import org.antlr.runtime.RecognitionException;
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -47,10 +43,12 @@ public class AssignmentExprTest extends ParserBase {
         assertEquals(Type.FLOAT, tree.getResultType());
         assertEquals(BinaryOpType.EQ, tree.getOp());
         assertEquals(VariableExpr.class, tree.getLeft().getClass());
-        assertEquals("foo", ((VariableExpr) tree.getLeft()).getVariable().getName());
+        Variable var = ((VariableExpr) tree.getLeft()).getVariable();
+        assertEquals("foo", var.getName());
         assertEquals(Type.FLOAT, tree.getRight().getResultType());
         assertEquals(LiteralExpr.class, tree.getRight().getClass());
-        assertEquals(32.0f, ((LiteralExpr) tree.getRight()).getValue());
+        Object val = ((LiteralExpr) tree.getRight()).getValue();
+        assertEquals(32.0f, val);
     }
 
     @Test(expected = RuntimeException.class)
@@ -64,41 +62,45 @@ public class AssignmentExprTest extends ParserBase {
         assertEquals(Type.FLOAT4, tree.getResultType());
         assertEquals(BinaryOpType.EQ, tree.getOp());
         assertEquals(VariableExpr.class, tree.getLeft().getClass());
-        assertEquals("color", ((VariableExpr) tree.getLeft()).getVariable().getName());
+        Variable var = ((VariableExpr) tree.getLeft()).getVariable();
+        assertEquals("color", var.getName());
         assertEquals(Type.FLOAT4, tree.getRight().getResultType());
         assertEquals(VectorCtorExpr.class, tree.getRight().getClass());
-        assertEquals(4, ((VectorCtorExpr) tree.getRight()).getParams().size());
-        assertEquals(Type.FLOAT, ((VectorCtorExpr) tree.getRight()).getParams().get(0).getResultType());
-        assertEquals(1.0f, ((LiteralExpr) ((VectorCtorExpr) tree.getRight()).getParams().get(0)).getValue());
+        List<Expr> params = ((VectorCtorExpr) tree.getRight()).getParams();
 
-        assertEquals(Type.FLOAT, ((VectorCtorExpr) tree.getRight()).getParams().get(1).getResultType());
-        assertEquals(1.0f, ((LiteralExpr) ((VectorCtorExpr) tree.getRight()).getParams().get(1)).getValue());
+        assertEquals(4, params.size());
 
-        assertEquals(Type.FLOAT, ((VectorCtorExpr) tree.getRight()).getParams().get(2).getResultType());
-        assertEquals(1.0f, ((LiteralExpr) ((VectorCtorExpr) tree.getRight()).getParams().get(2)).getValue());
-
-        assertEquals(Type.FLOAT, ((VectorCtorExpr) tree.getRight()).getParams().get(3).getResultType());
-        assertEquals(1.0f, ((LiteralExpr) ((VectorCtorExpr) tree.getRight()).getParams().get(3)).getValue());
+        for (int i = 0; i < 4; i++) {
+            Object val = ((LiteralExpr) params.get(i)).getValue();
+            assertEquals(Type.FLOAT, params.get(i).getResultType());
+            assertEquals(1.0f, val);
+        }
     }
 
     @Test
     public void coreVarField() throws Exception {
         BinaryExpr tree = parseTreeFor("color.r = 3.0");
+        assertEquals(Type.FLOAT, tree.getResultType());
+        assertEquals(BinaryOpType.EQ, tree.getOp());
+        assertEquals(FieldSelectExpr.class, tree.getLeft().getClass());
+        FieldSelectExpr fsExpr = (FieldSelectExpr) tree.getLeft();
+        VariableExpr expr = (VariableExpr) fsExpr.getExpr();
+        assertEquals(Type.FLOAT4, expr.getResultType());
+        assertEquals("r", fsExpr.getFields());
+        assertEquals("color", expr.getVariable().getName());
+        assertEquals(LiteralExpr.class, tree.getRight().getClass());
+        Object val = ((LiteralExpr) tree.getRight()).getValue();
+        assertEquals(3.0f, val);
     }
 
     @Test(expected = RuntimeException.class)
     public void coreROVar() throws Exception {
-        BinaryExpr tree = parseTreeFor("pos0 = float2(1.0)");
-        assertEquals(Type.FLOAT2, tree.getResultType());
-        assertEquals(BinaryOpType.EQ, tree.getOp());
-        assertEquals(Type.FLOAT2, tree.getRight().getResultType());
-        assertEquals(1.0, ((LiteralExpr) tree.getRight()).getValue());
-
+        parseTreeFor("pos0 = float2(1.0)");
     }
 
     @Test(expected = RuntimeException.class)
     public void coreROVarField() throws Exception {
-        BinaryExpr tree = parseTreeFor("pos0.x = 1.0");
+        parseTreeFor("pos0.x = 1.0");
     }
 
     @Test(expected = RecognitionException.class)

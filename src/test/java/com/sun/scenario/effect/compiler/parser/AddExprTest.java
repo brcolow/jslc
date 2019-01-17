@@ -47,19 +47,19 @@ public class AddExprTest extends MultExprTest {
     @Test
     public void oneAddition() throws Exception {
         BinaryExpr tree = parseTreeFor(mult + " + " + mult);
-        assertEquals(tree.getOp(), BinaryOpType.ADD);
+        assertEquals(BinaryOpType.ADD, tree.getOp());
     }
 
     @Test
     public void oneSubtraction() throws Exception {
         BinaryExpr tree = parseTreeFor(mult + "   - " + mult);
-        assertEquals(tree.getOp(), BinaryOpType.SUB);
+        assertEquals(BinaryOpType.SUB, tree.getOp());
     }
 
     @Test
     public void additiveCombination() throws Exception {
         BinaryExpr tree = parseTreeFor(mult + " + " + mult + '-' + mult + '-' + mult + "   +" + mult);
-        assertEquals(tree.getOp(), BinaryOpType.ADD);
+        assertEquals(BinaryOpType.ADD, tree.getOp());
     }
 
     @Test(expected = ClassCastException.class)

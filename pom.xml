@@ -46,7 +46,7 @@
                 <configuration>
                     <report>true</report>
                     <printGrammar>true</printGrammar>
-                    <profile>true</profile>
+                    <profile>false</profile>
                     <verbose>true</verbose>
                     <sourceDirectory>antlr/com/sun/scenario/effect/compiler</sourceDirectory>
                     <outputDirectory>${project.build.directory}/gensrc/antlr</outputDirectory>
