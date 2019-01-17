@@ -50,35 +50,35 @@ public class PrimaryExprTest extends ParserBase {
     public void variable() throws Exception {
         Expr tree = parseTreeFor("foo");
         assertTrue(tree instanceof VariableExpr);
-        assertEquals(((VariableExpr)tree).getVariable().getName(), "foo");
+        assertEquals("foo", ((VariableExpr) tree).getVariable().getName());
     }
 
     @Test
     public void intLiteral() throws Exception {
         Expr tree = parseTreeFor("123");
         assertTrue(tree instanceof LiteralExpr);
-        assertEquals(((LiteralExpr)tree).getValue(), new Integer(123));
+        assertEquals(123, ((LiteralExpr) tree).getValue());
     }
 
     @Test
     public void floatLiteral() throws Exception {
         Expr tree = parseTreeFor("1.234");
         assertTrue(tree instanceof LiteralExpr);
-        assertEquals(((LiteralExpr)tree).getValue(), new Float(1.234));
+        assertEquals(1.234f, ((LiteralExpr) tree).getValue());
     }
 
     @Test
     public void boolLiteralT() throws Exception {
         Expr tree = parseTreeFor("true");
         assertTrue(tree instanceof LiteralExpr);
-        assertEquals(((LiteralExpr)tree).getValue(), Boolean.TRUE);
+        assertEquals(Boolean.TRUE, ((LiteralExpr) tree).getValue());
     }
 
     @Test
     public void boolLiteralF() throws Exception {
         Expr tree = parseTreeFor("false");
         assertTrue(tree instanceof LiteralExpr);
-        assertEquals(((LiteralExpr)tree).getValue(), Boolean.FALSE);
+        assertEquals(Boolean.FALSE, ((LiteralExpr) tree).getValue());
     }
 
     @Test

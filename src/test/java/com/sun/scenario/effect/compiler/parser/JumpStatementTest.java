@@ -72,7 +72,7 @@ public class JumpStatementTest extends ParserBase {
         ReturnStmt ret = (ReturnStmt)tree;
         assertTrue(ret.getExpr() instanceof LiteralExpr);
         LiteralExpr lit = (LiteralExpr)ret.getExpr();
-        assertEquals(lit.getValue(), new Integer(3));
+        assertEquals(3, lit.getValue());
     }
 
     @Test(expected = RecognitionException.class)

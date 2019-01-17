@@ -47,19 +47,19 @@ public class MultExprTest extends UnaryExprTest {
     @Test
     public void oneMultiplication() throws Exception {
         BinaryExpr tree = parseTreeFor(unary + " * " + unary);
-        assertEquals(tree.getOp(), BinaryOpType.MUL);
+        assertEquals(BinaryOpType.MUL, tree.getOp());
     }
 
     @Test
     public void oneDivision() throws Exception {
         BinaryExpr tree = parseTreeFor(unary + "   / " + unary);
-        assertEquals(tree.getOp(), BinaryOpType.DIV);
+        assertEquals(BinaryOpType.DIV, tree.getOp());
     }
 
     @Test
     public void expressionCombination() throws Exception {
         BinaryExpr tree = parseTreeFor(unary + " * " + unary + '/' + unary + '/' + unary + "   *" + unary);
-        assertEquals(tree.getOp(), BinaryOpType.MUL);
+        assertEquals(BinaryOpType.MUL, tree.getOp());
     }
 
     @Test(expected = ClassCastException.class)

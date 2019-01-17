@@ -38,73 +38,73 @@ public class FieldSelectTest extends ParserBase {
     @Test
     public void rgba() throws Exception {
         String tree = parseTreeFor(".rgba");
-        assertEquals(tree, ".rgba");
+        assertEquals(".rgba", tree);
     }
 
     @Test
     public void rgb() throws Exception {
         String tree = parseTreeFor(".rgb");
-        assertEquals(tree, ".rgb");
+        assertEquals(".rgb", tree);
     }
 
     @Test
     public void rg() throws Exception {
         String tree = parseTreeFor(".rg");
-        assertEquals(tree, ".rg");
+        assertEquals(".rg", tree);
     }
 
     @Test
     public void r() throws Exception {
         String tree = parseTreeFor(".r");
-        assertEquals(tree, ".r");
+        assertEquals(".r", tree);
     }
 
     @Test
     public void aaaa() throws Exception {
         String tree = parseTreeFor(".aaaa");
-        assertEquals(tree, ".aaaa");
+        assertEquals(".aaaa", tree);
     }
 
     @Test
     public void abgr() throws Exception {
         String tree = parseTreeFor(".abgr");
-        assertEquals(tree, ".abgr");
+        assertEquals(".abgr", tree);
     }
 
     @Test
     public void xyzw() throws Exception {
         String tree = parseTreeFor(".xyzw");
-        assertEquals(tree, ".xyzw");
+        assertEquals(".xyzw", tree);
     }
 
     @Test
     public void xyz() throws Exception {
         String tree = parseTreeFor(".xyz");
-        assertEquals(tree, ".xyz");
+        assertEquals(".xyz", tree);
     }
 
     @Test
     public void xy() throws Exception {
         String tree = parseTreeFor(".xy");
-        assertEquals(tree, ".xy");
+        assertEquals(".xy", tree);
     }
 
     @Test
     public void x() throws Exception {
         String tree = parseTreeFor(".x");
-        assertEquals(tree, ".x");
+        assertEquals(".x", tree);
     }
 
     @Test
     public void zzz() throws Exception {
         String tree = parseTreeFor(".zzz");
-        assertEquals(tree, ".zzz");
+        assertEquals(".zzz", tree);
     }
 
     @Test
     public void wzyz() throws Exception {
         String tree = parseTreeFor(".wzyx");
-        assertEquals(tree, ".wzyx");
+        assertEquals(".wzyx", tree);
     }
 
     @Test(expected = RecognitionException.class)

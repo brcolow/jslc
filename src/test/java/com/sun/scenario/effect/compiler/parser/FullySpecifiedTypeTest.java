@@ -40,14 +40,14 @@ public class FullySpecifiedTypeTest extends ParserBase {
     public void unqualified() throws Exception {
         fully_specified_type_return ret = parseTreeFor("float");
         assertNull(ret.qual);
-        assertEquals(ret.type, Type.FLOAT);
+        assertEquals(Type.FLOAT, ret.type);
     }
 
     @Test
     public void qualified() throws Exception {
         fully_specified_type_return ret = parseTreeFor("param bool3");
-        assertEquals(ret.qual, Qualifier.PARAM);
-        assertEquals(ret.type, Type.BOOL3);
+        assertEquals(Qualifier.PARAM, ret.qual);
+        assertEquals(Type.BOOL3, ret.type);
     }
 
     @Test(expected = RecognitionException.class)

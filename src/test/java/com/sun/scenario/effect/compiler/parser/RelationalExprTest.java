@@ -39,25 +39,25 @@ public class RelationalExprTest extends ParserBase {
     @Test
     public void oneLtEq() throws Exception {
         BinaryExpr tree = parseTreeFor("foo <= 3");
-        assertEquals(tree.getOp(), BinaryOpType.LTEQ);
+        assertEquals(BinaryOpType.LTEQ, tree.getOp());
     }
 
     @Test
     public void oneGtEq() throws Exception {
         BinaryExpr tree = parseTreeFor("foo >= 3");
-        assertEquals(tree.getOp(), BinaryOpType.GTEQ);
+        assertEquals(BinaryOpType.GTEQ, tree.getOp());
     }
 
     @Test
     public void oneLt() throws Exception {
         BinaryExpr tree = parseTreeFor("foo < 3");
-        assertEquals(tree.getOp(), BinaryOpType.LT);
+        assertEquals(BinaryOpType.LT, tree.getOp());
     }
 
     @Test
     public void oneGt() throws Exception {
         BinaryExpr tree = parseTreeFor("foo > 3");
-        assertEquals(tree.getOp(), BinaryOpType.GT);
+        assertEquals(BinaryOpType.GT, tree.getOp());
     }
 
     @Test(expected = RecognitionException.class)
