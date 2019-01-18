@@ -51,7 +51,7 @@ public class UnaryExprTest extends PrimaryExprTest {
     public void negated() throws Exception {
         UnaryExpr tree = parseTreeFor("!true");
         assertEquals(UnaryOpType.NOT, tree.getOp());
-        assertEquals((Boolean.TRUE, ((LiteralExpr) tree.getExpr()).getValue());
+        assertEquals(Boolean.TRUE, ((LiteralExpr) tree.getExpr()).getValue());
     }
 
     @Test

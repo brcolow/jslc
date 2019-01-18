@@ -37,8 +37,8 @@ import static com.sun.scenario.effect.compiler.model.Type.*;
  */
 public class CoreSymbols {
 
-    private static Set<Variable> vars = new HashSet<Variable>();
-    private static Set<Function> funcs = new HashSet<Function>();
+    private static Set<Variable> vars = new HashSet<>();
+    private static Set<Function> funcs = new HashSet<>();
 
     static Set<Variable> getAllVariables() {
         return vars;
@@ -151,6 +151,9 @@ public class CoreSymbols {
 
         // <ftype> ddy(<ftype> p)
         declareOverloadsSimple("ddy");
+
+        // <ftype> fma(<ftype> x, <ftype> y, <ftype> z)
+        declareOverloadsSimple3("fma");
     }
 
     private static void declareVariable(String name, Type type,
@@ -165,13 +168,13 @@ public class CoreSymbols {
                                         String name,
                                         Object... params)
     {
-        List<Param> paramList = new ArrayList<Param>();
+        List<Param> paramList = new ArrayList<>();
         if (params.length % 2 != 0) {
             throw new InternalError("Params array length must be even");
         }
         for (int i = 0; i < params.length; i+=2) {
-            if (!(params[i+0] instanceof Type) ||
-                !(params[i+1] instanceof String))
+            if (!(params[i] instanceof Type) ||
+                    !(params[i+1] instanceof String))
             {
                 throw new InternalError("Params must be specified as (Type,String) pairs");
             }
@@ -192,6 +195,13 @@ public class CoreSymbols {
         declareFunction(FLOAT2, name, FLOAT2, "x", FLOAT2, "y");
         declareFunction(FLOAT3, name, FLOAT3, "x", FLOAT3, "y");
         declareFunction(FLOAT4, name, FLOAT4, "x", FLOAT4, "y");
+    }
+
+    private static void declareOverloadsSimple3(String name) {
+        declareFunction(FLOAT,  name, FLOAT,  "x", FLOAT,  "y", FLOAT, "z");
+        declareFunction(FLOAT2, name, FLOAT2, "x", FLOAT2, "y", FLOAT2, "z");
+        declareFunction(FLOAT3, name, FLOAT3, "x", FLOAT3, "y", FLOAT3, "z");
+        declareFunction(FLOAT4, name, FLOAT4, "x", FLOAT4, "y", FLOAT4, "z");
     }
 
     private static void declareOverloadsMinMax(String name) {

@@ -97,4 +97,9 @@ public class BinaryExpr extends Expr {
     public void accept(TreeVisitor tv) {
         tv.visitBinaryExpr(this);
     }
+
+    @Override
+    public String toString() {
+        return getLeft() + " " + getOp().getSymbol() + " " + getRight() + ";";
+    }
 }

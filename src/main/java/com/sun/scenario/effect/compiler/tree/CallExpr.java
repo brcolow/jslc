@@ -52,4 +52,20 @@ public class CallExpr extends Expr {
     public void accept(TreeVisitor tv) {
         tv.visitCallExpr(this);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder toStr = new StringBuilder();
+        toStr.append(func.getName()).append("(");
+        if (!params.isEmpty()) {
+            for (int i = 0; i < params.size(); i++) {
+                toStr.append(params.get(i));
+                if (i + 1 < params.size()) {
+                    toStr.append(", ");
+                }
+            }
+        }
+        toStr.append(");");
+        return toStr.toString();
+    }
 }

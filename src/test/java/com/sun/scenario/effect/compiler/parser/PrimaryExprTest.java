@@ -29,11 +29,14 @@ import com.sun.scenario.effect.compiler.JSLParser;
 import com.sun.scenario.effect.compiler.model.Type;
 import com.sun.scenario.effect.compiler.tree.Expr;
 import com.sun.scenario.effect.compiler.tree.LiteralExpr;
+import com.sun.scenario.effect.compiler.tree.ParenExpr;
 import com.sun.scenario.effect.compiler.tree.VariableExpr;
-import static com.sun.scenario.effect.compiler.parser.Expressions.SIMPLE_EXPRESSION;
 import org.antlr.runtime.RecognitionException;
 import org.junit.Before;
 import org.junit.Test;
+
+import static com.sun.scenario.effect.compiler.parser.Expressions.SIMPLE_EXPRESSION;
+import static com.sun.scenario.effect.compiler.parser.Expressions.SIMPLE_EXPRESSION_VALUE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -82,8 +85,12 @@ public class PrimaryExprTest extends ParserBase {
     }
 
     @Test
-    public void bracketted() throws Exception {
+    public void bracketed() throws Exception {
         Expr tree = parseTreeFor("(" + primary + ")");
+        assertTrue(tree instanceof ParenExpr);
+        Expr expr = ((ParenExpr) tree).getExpr();
+        assertTrue(expr instanceof LiteralExpr);
+        assertEquals(5, ((LiteralExpr) expr).getValue());
     }
 
     @Test(expected = RecognitionException.class)
@@ -99,5 +106,9 @@ public class PrimaryExprTest extends ParserBase {
 
     protected String primary() {
         return SIMPLE_EXPRESSION;
+    }
+
+    protected int primaryValue() {
+        return SIMPLE_EXPRESSION_VALUE;
     }
 }

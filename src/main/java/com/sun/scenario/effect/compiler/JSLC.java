@@ -347,7 +347,7 @@ public class JSLC {
             String prefix0 = "Usage: java "+prog+" ";
             String prefix1 = "";
             for (int i = 0; i < prefix0.length(); i++) prefix1 += " ";
-            out.println(prefix0+"[-d3d | -es2 | -java | -sse | -me | -sw | -hw | -all]");
+            out.println(prefix0+"[-d3d | -d3d11 | -es2 | -java | -sse | -me | -sw | -hw | -all]");
             out.println(prefix1+"[-o <outdir>] [-i <srcdir>] [-t]");
             out.println(prefix1+"[-name <name>] [-ifname <interface name>]");
             if (extraOpts != null) {
@@ -361,14 +361,14 @@ public class JSLC {
             System.exit(1);
         }
 
-        public void parseAllArgs(String args[]) {
+        public void parseAllArgs(String[] args) {
             int index = parseArgs(args);
             if (index != args.length) {
                 error("unrecognized argument: "+args[index]);
             }
         }
 
-        public int parseArgs(String args[]) {
+        public int parseArgs(String[] args) {
             int i = 0;
             while (i < args.length) {
                 int consumed = parseArg(args, i);
@@ -383,7 +383,7 @@ public class JSLC {
             return i;
         }
 
-        public int parseArg(String args[], int index) {
+        public int parseArg(String[] args, int index) {
             String arg = args[index++];
             if (arg.equals("-force")) {
                 force = true;
@@ -413,18 +413,24 @@ public class JSLC {
             } else {
                 try {
                     // options with 1 argument
-                    if (arg.equals("-o")) {
-                        outDir = args[index];
-                    } else if (arg.equals("-i")) {
-                        srcDirs.add(args[index]);
-                    } else if (arg.equals("-name")) {
-                        shaderName = args[index];
-                    } else if (arg.equals("-ifname")) {
-                        interfaceName = args[index];
-                    } else if (arg.equals("-pkg")) {
-                        pkgName = args[index];
-                    } else {
-                        return 0;
+                    switch (arg) {
+                        case "-o":
+                            outDir = args[index];
+                            break;
+                        case "-i":
+                            srcDirs.add(args[index]);
+                            break;
+                        case "-name":
+                            shaderName = args[index];
+                            break;
+                        case "-ifname":
+                            interfaceName = args[index];
+                            break;
+                        case "-pkg":
+                            pkgName = args[index];
+                            break;
+                        default:
+                            return 0;
                     }
                 } catch (ArrayIndexOutOfBoundsException e) {
                     return -1;

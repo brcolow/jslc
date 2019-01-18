@@ -82,12 +82,13 @@ public class GLSLBackend extends SLBackend {
         funcMap.put("intcast", "int");
         funcMap.put("any", "any");
         funcMap.put("length", "length");
+        funcMap.put("fma", "fma");
     }
 
 
     static String PIXCOORD = "vec2 pixcoord = vec2(\n"+
-        "    gl_FragCoord.x-jsl_pixCoordOffset.x,\n" +
-        "    ((jsl_pixCoordOffset.z-gl_FragCoord.y)*jsl_pixCoordOffset.w)-jsl_pixCoordOffset.y);\n";
+            "    gl_FragCoord.x-jsl_pixCoordOffset.x,\n" +
+            "    ((jsl_pixCoordOffset.z-gl_FragCoord.y)*jsl_pixCoordOffset.w)-jsl_pixCoordOffset.y);\n";
 
     static String MAIN = "void main() {\n";
 

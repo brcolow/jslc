@@ -70,7 +70,7 @@ public enum BinaryOpType {
     private String symbol;
     private Op op;
 
-    private BinaryOpType(String symbol, Op op) {
+    BinaryOpType(String symbol, Op op) {
         this.symbol = symbol;
         this.op = op;
     }
@@ -89,11 +89,11 @@ public enum BinaryOpType {
     }
 
     public boolean isRelational() {
-        return (op == Op.REL);
+        return op == Op.REL;
     }
 
     public boolean isAssignment() {
-        return (op == Op.ASSIGN);
+        return op == Op.ASSIGN;
     }
 
     @Override

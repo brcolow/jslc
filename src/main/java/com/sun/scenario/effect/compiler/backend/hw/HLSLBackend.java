@@ -85,6 +85,7 @@ public class HLSLBackend extends SLBackend {
         funcMap.put("intcast", "int");
         funcMap.put("any", "any");
         funcMap.put("length", "length");
+        funcMap.put("fma", "fma");
     }
 
     @Override

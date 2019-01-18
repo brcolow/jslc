@@ -130,11 +130,13 @@ class JSWFuncImpls {
 
         // <ftype> ddy(<ftype> p)
         declareOverloadsSimple("ddy", "<ddy() not implemented for sw backends>");
+
+        // <ftype> fma(<ftype> x, <ftype> y, <ftype> z)
+        declareOverloadsSimple3("fma", "(float)Math.fma(x_tmp$1, y_tmp$2, z_tmp$3)");
     }
 
     private static void declareFunction(FuncImpl impl,
-                                        String name, Type... ptypes)
-    {
+                                        String name, Type... ptypes) {
         Function f = CoreSymbols.getFunction(name, Arrays.asList(ptypes));
         if (f == null) {
             throw new InternalError("Core function not found (have you declared the function in CoreSymbols?)");
@@ -260,6 +262,28 @@ class JSWFuncImpls {
                 }
             };
             declareFunction(fimpl, name, type, type);
+        }
+    }
+
+    /**
+     * Used to declare simple three parameter functions of the following form:
+     *   <ftype> name(<ftype> x, <ftype> y, <ftype> z)
+     */
+    private static void declareOverloadsSimple3(String name, final String pattern) {
+        for (Type type : new Type[] {FLOAT, FLOAT2, FLOAT3, FLOAT4}) {
+            // declare (vectype,vectype,vectype) variants
+            final boolean useSuffix = (type != FLOAT);
+            FuncImpl fimpl = new FuncImpl() {
+                public String toString(int i, List<Expr> params) {
+                    String sfx = useSuffix ? JSWBackend.getSuffix(i) : "";
+                    String s = pattern;
+                    s = s.replace("$1", sfx);
+                    s = s.replace("$2", sfx);
+                    s = s.replace("$3", sfx);
+                    return s;
+                }
+            };
+            declareFunction(fimpl, name, type, type, type);
         }
     }
 

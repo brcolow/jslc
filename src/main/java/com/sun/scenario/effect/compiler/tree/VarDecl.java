@@ -50,4 +50,9 @@ public class VarDecl extends ExtDecl {
     public void accept(TreeVisitor tv) {
         tv.visitVarDecl(this);
     }
+
+    @Override
+    public String toString() {
+        return var.getName() + " = " + init.toString();
+    }
 }

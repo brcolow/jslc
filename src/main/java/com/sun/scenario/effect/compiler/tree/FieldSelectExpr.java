@@ -63,4 +63,9 @@ public class FieldSelectExpr extends Expr {
     public void accept(TreeVisitor tv) {
         tv.visitFieldSelectExpr(this);
     }
+
+    @Override
+    public String toString() {
+        return expr + "." + fields;
+    }
 }
