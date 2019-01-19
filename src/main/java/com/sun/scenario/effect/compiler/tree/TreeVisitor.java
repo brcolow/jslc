@@ -38,6 +38,7 @@ public class TreeVisitor {
     public void visitBinaryExpr(BinaryExpr e) {
     }
 
+    // visitUnary_expression
     public void visitUnaryExpr(UnaryExpr e) {
     }
 
@@ -59,51 +60,64 @@ public class TreeVisitor {
     public void visitArrayAccessExpr(ArrayAccessExpr e) {
     }
 
+    // visitFunction_call
     public void visitCallExpr(CallExpr e) {
     }
 
+    // visitJump_statement
     public void visitContinueStmt(ContinueStmt s) {
     }
 
+    // visitJump_statement
     public void visitBreakStmt(BreakStmt s) {
     }
 
+    // visitJump_statement
     public void visitDiscardStmt(DiscardStmt s) {
     }
 
+    // visitJump_statement
     public void visitReturnStmt(ReturnStmt s) {
     }
 
     public void visitSelectStmt(SelectStmt s) {
     }
 
+    // visitIteration_statement
     public void visitWhileStmt(WhileStmt s) {
     }
 
+    // visitIteration_statement
     public void visitDoWhileStmt(DoWhileStmt s) {
     }
 
+    // visitIteration_statement
     public void visitForStmt(ForStmt s) {
     }
 
     public void visitExprStmt(ExprStmt s) {
     }
 
+    // visitDeclaration
     public void visitDeclStmt(DeclStmt s) {
     }
 
     public void visitCompoundStmt(CompoundStmt s) {
     }
 
+    // visitFunction_definition
     public void visitFuncDef(FuncDef d) {
     }
 
+    // visitSingle_declaration
     public void visitVarDecl(VarDecl d) {
     }
 
+    // visitGlue_block
     public void visitGlueBlock(GlueBlock b) {
     }
 
+    // visitTranslation_unit
     public void visitProgramUnit(ProgramUnit p) {
     }
 }

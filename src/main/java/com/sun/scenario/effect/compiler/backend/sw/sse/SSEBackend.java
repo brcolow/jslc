@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2019, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,8 +25,6 @@
 
 package com.sun.scenario.effect.compiler.backend.sw.sse;
 
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -35,28 +33,37 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
 import com.sun.scenario.effect.compiler.JSLParser;
-import com.sun.scenario.effect.compiler.model.*;
+import com.sun.scenario.effect.compiler.model.BaseType;
+import com.sun.scenario.effect.compiler.model.Qualifier;
+import com.sun.scenario.effect.compiler.model.Type;
+import com.sun.scenario.effect.compiler.model.Types;
+import com.sun.scenario.effect.compiler.model.Variable;
 import com.sun.scenario.effect.compiler.tree.FuncDef;
+import com.sun.scenario.effect.compiler.tree.JSLCVisitor;
 import com.sun.scenario.effect.compiler.tree.ProgramUnit;
 import com.sun.scenario.effect.compiler.tree.TreeScanner;
-import org.antlr.stringtemplate.StringTemplate;
-import org.antlr.stringtemplate.StringTemplateGroup;
-import org.antlr.stringtemplate.language.DefaultTemplateLexer;
+import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STGroup;
+import org.stringtemplate.v4.STGroupFile;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  */
 public class SSEBackend extends TreeScanner {
 
     private final JSLParser parser;
+    private final JSLCVisitor visitor;
     private final String body;
 
-    public SSEBackend(JSLParser parser, ProgramUnit program) {
+    public SSEBackend(JSLParser parser, JSLCVisitor visitor, ProgramUnit program) {
         // TODO: will be removed once we clean up static usage
         resetStatics();
 
         this.parser = parser;
-
+        this.visitor = visitor;
         SSETreeScanner scanner = new SSETreeScanner();
         scanner.scan(program);
         this.body = scanner.getResult();
@@ -79,8 +86,7 @@ public class SSEBackend extends TreeScanner {
     }
 
     private static SortedSet<Variable> getSortedVars(Collection<Variable> unsortedVars) {
-        Comparator<Variable> c = (v0, v1) -> v0.getName().compareTo(v1.getName());
-        SortedSet<Variable> sortedVars = new TreeSet<Variable>(c);
+        SortedSet<Variable> sortedVars = new TreeSet<>(Comparator.comparing(Variable::getName));
         sortedVars.addAll(unsortedVars);
         return sortedVars;
     }
@@ -90,7 +96,7 @@ public class SSEBackend extends TreeScanner {
                                     String genericsName,
                                     String interfaceName)
     {
-        Map<String, Variable> vars = parser.getSymbolTable().getGlobalVariables();
+        Map<String, Variable> vars = visitor.getSymbolTable().getGlobalVariables();
         StringBuilder genericsDecl = new StringBuilder();
         StringBuilder interfaceDecl = new StringBuilder();
         StringBuilder constants = new StringBuilder();
@@ -312,41 +318,39 @@ public class SSEBackend extends TreeScanner {
             interfaceDecl.append("implements "+interfaceName);
         }
 
-        Reader template = new InputStreamReader(getClass().getResourceAsStream("SSEJavaGlue.stg"));
-        StringTemplateGroup group = new StringTemplateGroup(template, DefaultTemplateLexer.class);
-        StringTemplate jglue = group.getInstanceOf("glue");
-        jglue.setAttribute("effectName", effectName);
-        jglue.setAttribute("peerName", peerName);
-        jglue.setAttribute("genericsDecl", genericsDecl.toString());
-        jglue.setAttribute("interfaceDecl", interfaceDecl.toString());
-        jglue.setAttribute("usercode", usercode.toString());
-        jglue.setAttribute("samplers", samplers.toString());
-        jglue.setAttribute("cleanup", cleanup.toString());
-        jglue.setAttribute("srcRects", srcRects.toString());
-        jglue.setAttribute("constants", constants.toString());
-        jglue.setAttribute("params", jparams.toString());
-        jglue.setAttribute("paramDecls", jparamDecls.toString());
+        STGroup group = new STGroupFile(getClass().getResource("SSEJavaGlue.st"), UTF_8.displayName(), '$', '$');
+        ST jglue = group.getInstanceOf("glue");
+        jglue.add("effectName", effectName);
+        jglue.add("peerName", peerName);
+        jglue.add("genericsDecl", genericsDecl.toString());
+        jglue.add("interfaceDecl", interfaceDecl.toString());
+        jglue.add("usercode", usercode.toString());
+        jglue.add("samplers", samplers.toString());
+        jglue.add("cleanup", cleanup.toString());
+        jglue.add("srcRects", srcRects.toString());
+        jglue.add("constants", constants.toString());
+        jglue.add("params", jparams.toString());
+        jglue.add("paramDecls", jparamDecls.toString());
 
-        template = new InputStreamReader(getClass().getResourceAsStream("SSENativeGlue.stg"));
-        group = new StringTemplateGroup(template, DefaultTemplateLexer.class);
-        StringTemplate cglue = group.getInstanceOf("glue");
-        cglue.setAttribute("peerName", peerName);
-        cglue.setAttribute("jniName", peerName.replace("_", "_1"));
-        cglue.setAttribute("paramDecls", cparamDecls.toString());
-        cglue.setAttribute("arrayGet", arrayGet.toString());
-        cglue.setAttribute("arrayRelease", arrayRelease.toString());
-        cglue.setAttribute("posDecls", posDecls.toString());
-        cglue.setAttribute("pixInitY", pixInitY.toString());
-        cglue.setAttribute("pixInitX", pixInitX.toString());
-        cglue.setAttribute("posIncrY", posIncrY.toString());
-        cglue.setAttribute("posInitY", posInitY.toString());
-        cglue.setAttribute("posIncrX", posIncrX.toString());
-        cglue.setAttribute("posInitX", posInitX.toString());
-        cglue.setAttribute("body", body);
+        group = new STGroupFile(getClass().getResource("SSENativeGlue.st"), UTF_8.displayName(), '$', '$');
+        ST cglue = group.getInstanceOf("glue");
+        cglue.add("peerName", peerName);
+        cglue.add("jniName", peerName.replace("_", "_1"));
+        cglue.add("paramDecls", cparamDecls.toString());
+        cglue.add("arrayGet", arrayGet.toString());
+        cglue.add("arrayRelease", arrayRelease.toString());
+        cglue.add("posDecls", posDecls.toString());
+        cglue.add("pixInitY", pixInitY.toString());
+        cglue.add("pixInitX", pixInitX.toString());
+        cglue.add("posIncrY", posIncrY.toString());
+        cglue.add("posInitY", posInitY.toString());
+        cglue.add("posIncrX", posIncrX.toString());
+        cglue.add("posInitX", posInitX.toString());
+        cglue.add("body", body);
 
         GenCode gen = new GenCode();
-        gen.javaCode = jglue.toString();
-        gen.nativeCode = cglue.toString();
+        gen.javaCode = jglue.render();
+        gen.nativeCode = cglue.render();
         return gen;
     }
 

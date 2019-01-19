@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2019, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -28,7 +28,7 @@ package com.sun.scenario.effect.compiler.parser;
 import com.sun.scenario.effect.compiler.JSLParser;
 import com.sun.scenario.effect.compiler.model.*;
 import com.sun.scenario.effect.compiler.tree.*;
-import org.antlr.runtime.RecognitionException;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.junit.Test;
 
 import java.util.List;
@@ -103,20 +103,21 @@ public class AssignmentExprTest extends ParserBase {
         parseTreeFor("pos0.x = 1.0");
     }
 
-    @Test(expected = RecognitionException.class)
+    @Test(expected = ParseCancellationException.class)
     public void notAnAssignment() throws Exception {
         parseTreeFor("const foo");
     }
 
-    private BinaryExpr parseTreeFor(String text) throws RecognitionException {
+    private BinaryExpr parseTreeFor(String text) throws Exception {
         JSLParser parser = parserOver(text);
-        SymbolTable st = parser.getSymbolTable();
+        JSLCVisitor visitor = new JSLCVisitor();
+        SymbolTable st = visitor.getSymbolTable();
         st.declareVariable("foo", Types.FLOAT, null);
         st.declareVariable("readonly", Types.FLOAT, Qualifier.CONST);
         // trick test into thinking main() function is currently in
         // scope so that we can test core variables such as color and pos0
         st.enterFrame();
         st.declareFunction("main", Types.VOID, null);
-        return (BinaryExpr)parser.assignment_expression();
+        return (BinaryExpr) visitor.visit(parser.assignment_expression());
     }
 }

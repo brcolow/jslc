@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2019, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,13 +26,9 @@
 package com.sun.scenario.effect.compiler.parser;
 
 import com.sun.scenario.effect.compiler.JSLParser;
-import com.sun.scenario.effect.compiler.model.Type;
 import com.sun.scenario.effect.compiler.model.Types;
-import com.sun.scenario.effect.compiler.tree.Expr;
-import com.sun.scenario.effect.compiler.tree.LiteralExpr;
-import com.sun.scenario.effect.compiler.tree.ParenExpr;
-import com.sun.scenario.effect.compiler.tree.VariableExpr;
-import org.antlr.runtime.RecognitionException;
+import com.sun.scenario.effect.compiler.tree.*;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -94,15 +90,16 @@ public class PrimaryExprTest extends ParserBase {
         assertEquals(5, ((LiteralExpr) expr).getValue());
     }
 
-    @Test(expected = RecognitionException.class)
+    @Test(expected = ParseCancellationException.class)
     public void notAPrimaryExpression() throws Exception {
         parseTreeFor("!(@&#");
     }
 
-    private Expr parseTreeFor(String text) throws RecognitionException {
+    private Expr parseTreeFor(String text) throws Exception {
         JSLParser parser = parserOver(text);
-        parser.getSymbolTable().declareVariable("foo", Types.INT, null);
-        return parser.primary_expression();
+        JSLCVisitor visitor = new JSLCVisitor();
+        visitor.getSymbolTable().declareVariable("foo", Types.INT, null);
+        return visitor.visitPrimary_expression(parser.primary_expression());
     }
 
     protected String primary() {

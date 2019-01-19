@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2019, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,13 +27,10 @@ package com.sun.scenario.effect.compiler.parser;
 
 import com.sun.scenario.effect.compiler.JSLParser;
 import com.sun.scenario.effect.compiler.tree.FuncDef;
-import org.antlr.runtime.RecognitionException;
+import com.sun.scenario.effect.compiler.tree.JSLCVisitor;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 public class FuncDefTest extends ParserBase {
 
@@ -47,8 +44,9 @@ public class FuncDefTest extends ParserBase {
         parseTreeFor("float fma(float x, float y, float z) { return x; }");
     }
 
-    private FuncDef parseTreeFor(String text) throws RecognitionException {
+    private FuncDef parseTreeFor(String text) throws Exception {
         JSLParser parser = parserOver(text);
-        return (FuncDef) parser.function_definition();
+        JSLCVisitor visitor = new JSLCVisitor();
+        return visitor.visitFunction_definition(parser.function_definition());
     }
 }

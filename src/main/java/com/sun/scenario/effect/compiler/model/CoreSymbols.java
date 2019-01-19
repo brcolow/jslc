@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2019, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -44,12 +44,16 @@ public class CoreSymbols {
         return vars;
     }
 
-    static Set<Function> getAllFunctions() {
+    public static Set<Function> getAllFunctions() {
         return funcs;
     }
 
     public static Function getFunction(String name, List<Type> ptypes) {
         return SymbolTable.getFunctionForSignature(funcs, name, ptypes);
+    }
+
+    public static boolean containsFunction(String name) {
+        return funcs.stream().anyMatch(function -> function.getName().equals(name));
     }
 
     static {
@@ -79,6 +83,20 @@ public class CoreSymbols {
         // GLSL only supports: bool any(<btype N> x); where N := 2, 3, 4
         // HLSL supports: bool any(<type> x)
         declareOverloadsBool("any");
+
+        // bool all(<btype> x)
+        // GLSL only supports: bool all(<btype N> x); where N := 2, 3, 4
+        // HLSL supports: bool all(<type> x)
+        declareOverloadsBool("all");
+
+        // bool isFinite(<ftype> x)
+        declareOverloadsBoolFloat("isFinite");
+
+        // bool isInfinite(<ftype> x)
+        declareOverloadsBoolFloat("isInfinite");
+
+        // bool isNaN(<ftype> x)
+        declareOverloadsBoolFloat("isNaN");
 
         // <ftype> min(<ftype> x, <ftype> y)
         // <ftype> min(<ftype> x, float y)
@@ -117,14 +135,44 @@ public class CoreSymbols {
         // <ftype> sin(<ftype> x)
         declareOverloadsSimple("sin");
 
+        // <ftype> asin(<ftype> x)
+        declareOverloadsSimple("asin");
+
+        // <ftype> sinh(<ftype> x)
+        declareOverloadsSimple("sinh");
+
         // <ftype> cos(<ftype> x)
         declareOverloadsSimple("cos");
+
+        // <ftype> acos(<ftype> x)
+        declareOverloadsSimple("acos");
+
+        // <ftype> cosh(<ftype> x)
+        declareOverloadsSimple("cosh");
 
         // <ftype> tan(<ftype> x)
         declareOverloadsSimple("tan");
 
+        // <ftype> atan(<ftype> x)
+        declareOverloadsSimple("atan");
+
+        // <ftype> atan2(<ftype> x, <ftype> y)
+        declareOverloadsSimple2("atan2");
+
+        // <ftype> tanh(<ftype> x)
+        declareOverloadsSimple("tanh");
+
+        // <ftype> degrees(<ftype> x)
+        declareOverloadsSimple("degrees");
+
+        // <ftype> radians(<ftype> x)
+        declareOverloadsSimple("radians");
+
         // <ftype> pow(<ftype> x, <ftype> y)
         declareOverloadsSimple2("pow");
+
+        // <ftype> exp(<ftype> x)
+        declareOverloadsSimple("exp");
 
         // <ftype> mod(<ftype> x, <ftype> y)
         // <ftype> mod(<ftype> x, float y)
@@ -132,6 +180,9 @@ public class CoreSymbols {
 
         // float dot(<ftype> x, <ftype> y)
         declareOverloadsFloat2("dot");
+
+        // float3 cross(float3 x, float3 y)
+        declareFunction(FLOAT3, "cross", FLOAT3,  "x", FLOAT3,  "y");
 
         // float distance(<ftype> x, <ftype> y)
         declareOverloadsFloat2("distance");
@@ -152,22 +203,23 @@ public class CoreSymbols {
         // <ftype> ddy(<ftype> p)
         declareOverloadsSimple("ddy");
 
+        // <ftype> trunc(<ftype> x)
+        declareOverloadsSimple("trunc");
+
         // <ftype> fma(<ftype> x, <ftype> y, <ftype> z)
         declareOverloadsSimple3("fma");
     }
 
     private static void declareVariable(String name, Type type,
                                         Precision precision,
-                                        boolean readonly)
-    {
+                                        boolean readonly) {
         Qualifier qual = readonly ? Qualifier.CONST : null;
         vars.add(new Variable(name, type, qual, precision, -1, -1, null, false));
     }
 
     private static void declareFunction(Type returnType,
                                         String name,
-                                        Object... params)
-    {
+                                        Object... params) {
         List<Param> paramList = new ArrayList<>();
         if (params.length % 2 != 0) {
             throw new InternalError("Params array length must be even");
@@ -248,6 +300,7 @@ public class CoreSymbols {
     }
 
     private static void declareOverloadsBool(String name) {
+        declareFunction(BOOL, name, BOOL, "x");
         declareFunction(BOOL, name, BOOL2, "x");
         declareFunction(BOOL, name, BOOL3, "x");
         declareFunction(BOOL, name, BOOL4, "x");
@@ -265,5 +318,12 @@ public class CoreSymbols {
         declareFunction(FLOAT, name, FLOAT2, "x", FLOAT2, "y");
         declareFunction(FLOAT, name, FLOAT3, "x", FLOAT3, "y");
         declareFunction(FLOAT, name, FLOAT4, "x", FLOAT4, "y");
+    }
+
+    private static void declareOverloadsBoolFloat(String name) {
+        declareFunction(BOOL, name, FLOAT,  "x");
+        declareFunction(BOOL2, name, FLOAT2, "x");
+        declareFunction(BOOL3, name, FLOAT3, "x");
+        declareFunction(BOOL4, name, FLOAT4, "x");
     }
 }

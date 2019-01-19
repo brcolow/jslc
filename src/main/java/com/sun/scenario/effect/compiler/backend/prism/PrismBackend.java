@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2019, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,36 +25,36 @@
 
 package com.sun.scenario.effect.compiler.backend.prism;
 
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.Map;
 import com.sun.scenario.effect.compiler.JSLParser;
-import com.sun.scenario.effect.compiler.model.*;
+import com.sun.scenario.effect.compiler.model.BaseType;
+import com.sun.scenario.effect.compiler.model.Qualifier;
+import com.sun.scenario.effect.compiler.model.Types;
+import com.sun.scenario.effect.compiler.model.Variable;
 import com.sun.scenario.effect.compiler.tree.GlueBlock;
+import com.sun.scenario.effect.compiler.tree.JSLCVisitor;
 import com.sun.scenario.effect.compiler.tree.ProgramUnit;
 import com.sun.scenario.effect.compiler.tree.TreeScanner;
 import com.sun.scenario.effect.compiler.tree.VariableExpr;
-import org.antlr.stringtemplate.StringTemplate;
-import org.antlr.stringtemplate.StringTemplateGroup;
-import org.antlr.stringtemplate.language.DefaultTemplateLexer;
+import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STGroup;
+import org.stringtemplate.v4.STGroupFile;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  */
 public class PrismBackend extends TreeScanner {
 
     private JSLParser parser;
+    private JSLCVisitor visitor;
     private StringBuilder usercode = new StringBuilder();
     private boolean isPixcoordReferenced = false;
 
-    public PrismBackend(JSLParser parser, ProgramUnit program) {
+    public PrismBackend(JSLParser parser, JSLCVisitor visitor, ProgramUnit program) {
         this.parser = parser;
+        this.visitor = visitor;
         scan(program);
-    }
-
-    private StringTemplate getTemplate(String type) {
-        Reader template = new InputStreamReader(getClass().getResourceAsStream(type + "Glue.stg"));
-        StringTemplateGroup group = new StringTemplateGroup(template, DefaultTemplateLexer.class);
-        return group.getInstanceOf("glue");
     }
 
     public String getGlueCode(String effectName,
@@ -62,7 +62,7 @@ public class PrismBackend extends TreeScanner {
                               String genericsName,
                               String interfaceName)
     {
-        Map<String, Variable> vars = parser.getSymbolTable().getGlobalVariables();
+        Map<String, Variable> vars = visitor.getSymbolTable().getGlobalVariables();
         StringBuilder genericsDecl = new StringBuilder();
         StringBuilder interfaceDecl = new StringBuilder();
         StringBuilder samplerLinear = new StringBuilder();
@@ -103,7 +103,7 @@ public class PrismBackend extends TreeScanner {
             }
         }
 
-        int numSamplers = parser.getSymbolTable().getNumSamplers();
+        int numSamplers = visitor.getSymbolTable().getNumSamplers();
         String superClass;
         if (numSamplers == 0) {
             superClass = "PPSZeroSamplerPeer";
@@ -123,19 +123,20 @@ public class PrismBackend extends TreeScanner {
             interfaceDecl.append("implements "+interfaceName);
         }
 
-        StringTemplate glue = getTemplate("Prism");
-        glue.setAttribute("effectName", effectName);
-        glue.setAttribute("peerName", peerName);
-        glue.setAttribute("superClass", superClass);
-        glue.setAttribute("genericsDecl", genericsDecl.toString());
-        glue.setAttribute("interfaceDecl", interfaceDecl.toString());
-        glue.setAttribute("usercode", usercode.toString());
-        glue.setAttribute("samplerLinear", samplerLinear.toString());
-        glue.setAttribute("samplerInit", samplerInit.toString());
-        glue.setAttribute("paramInit", paramInit.toString());
-        glue.setAttribute("paramUpdate", paramUpdate.toString());
-        glue.setAttribute("isPixcoordUsed", isPixcoordReferenced);
-        return glue.toString();
+        STGroup group = new STGroupFile(getClass().getResource("PrismGlue.st"), UTF_8.displayName(), '$', '$');
+        ST glue = group.getInstanceOf("glue");
+        glue.add("effectName", effectName);
+        glue.add("peerName", peerName);
+        glue.add("superClass", superClass);
+        glue.add("genericsDecl", genericsDecl.toString());
+        glue.add("interfaceDecl", interfaceDecl.toString());
+        glue.add("usercode", usercode.toString());
+        glue.add("samplerLinear", samplerLinear.toString());
+        glue.add("samplerInit", samplerInit.toString());
+        glue.add("paramInit", paramInit.toString());
+        glue.add("paramUpdate", paramUpdate.toString());
+        glue.add("isPixcoordUsed", isPixcoordReferenced);
+        return glue.render();
     }
 
     @Override

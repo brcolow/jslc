@@ -30,14 +30,15 @@ import java.util.Map;
 import com.sun.scenario.effect.compiler.JSLParser;
 import com.sun.scenario.effect.compiler.model.Qualifier;
 import com.sun.scenario.effect.compiler.model.Type;
+import com.sun.scenario.effect.compiler.tree.JSLCVisitor;
 import com.sun.scenario.effect.compiler.tree.ProgramUnit;
 
 /**
  */
 public class GLSLBackend extends SLBackend {
 
-    public GLSLBackend(JSLParser parser) {
-        super(parser);
+    public GLSLBackend(JSLParser parser, JSLCVisitor visitor) {
+        super(parser, visitor);
     }
 
     private static final Map<String, String> qualMap = new HashMap<String, String>();
@@ -76,13 +77,11 @@ public class GLSLBackend extends SLBackend {
 
     private static final Map<String, String> funcMap = new HashMap<String, String>();
     static {
+        // Note: Only functions that are different need to be added here.
         funcMap.put("sample", "jsl_sample");
         funcMap.put("ddx", "dFdx");
         funcMap.put("ddy", "dFdy");
         funcMap.put("intcast", "int");
-        funcMap.put("any", "any");
-        funcMap.put("length", "length");
-        funcMap.put("fma", "fma");
     }
 
 
@@ -106,13 +105,13 @@ public class GLSLBackend extends SLBackend {
     @Override
     protected String getVar(String v) {
         String s = varMap.get(v);
-        return (s != null) ? s : v;
+        return s != null ? s : v;
     }
 
     @Override
     protected String getFuncName(String f) {
         String s = funcMap.get(f);
-        return (s != null) ? s : f;
+        return s != null ? s : f;
     }
 
     @Override

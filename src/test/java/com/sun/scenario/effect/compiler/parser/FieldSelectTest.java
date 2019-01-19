@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2019, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,9 +26,11 @@
 package com.sun.scenario.effect.compiler.parser;
 
 import com.sun.scenario.effect.compiler.JSLParser;
+import com.sun.scenario.effect.compiler.tree.BinaryExpr;
+import com.sun.scenario.effect.compiler.tree.JSLCVisitor;
 import junit.framework.Assert;
 import junit.framework.AssertionFailedError;
-import org.antlr.runtime.RecognitionException;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -102,12 +104,12 @@ public class FieldSelectTest extends ParserBase {
     }
 
     @Test
-    public void wzyz() throws Exception {
+    public void wzyx() throws Exception {
         String tree = parseTreeFor(".wzyx");
         assertEquals(".wzyx", tree);
     }
 
-    @Test(expected = RecognitionException.class)
+    @Test(expected = ParseCancellationException.class)
     public void notAFieldSelection1() throws Exception {
         parseTreeFor("qpz");
     }
@@ -127,17 +129,18 @@ public class FieldSelectTest extends ParserBase {
         parseTreeFor(".xyba", true);
     }
 
-    private String parseTreeFor(String text) throws RecognitionException {
+    private String parseTreeFor(String text) throws Exception {
         return parseTreeFor(text, false);
     }
 
-    private String parseTreeFor(String text, boolean expectEx) throws RecognitionException {
+    private String parseTreeFor(String text, boolean expectEx) throws Exception {
         JSLParser parser = parserOver(text);
-        String ret = parser.field_selection();
+        JSLCVisitor visitor = new JSLCVisitor();
+        String ret = visitor.visitField_selection(parser.field_selection()).getString();
         // TODO: there's probably a better way to check for trailing (invalid) characters
         boolean sawException = false;
         try {
-            parser.field_selection();
+            visitor.visitField_selection(parser.field_selection());
         } catch (Exception e) {
             sawException = true;
         }

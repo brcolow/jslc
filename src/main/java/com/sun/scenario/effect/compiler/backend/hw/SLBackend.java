@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2019, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,7 +26,14 @@
 package com.sun.scenario.effect.compiler.backend.hw;
 
 import com.sun.scenario.effect.compiler.JSLParser;
-import com.sun.scenario.effect.compiler.model.*;
+import com.sun.scenario.effect.compiler.model.BinaryOpType;
+import com.sun.scenario.effect.compiler.model.Function;
+import com.sun.scenario.effect.compiler.model.Param;
+import com.sun.scenario.effect.compiler.model.Precision;
+import com.sun.scenario.effect.compiler.model.Qualifier;
+import com.sun.scenario.effect.compiler.model.Type;
+import com.sun.scenario.effect.compiler.model.Types;
+import com.sun.scenario.effect.compiler.model.Variable;
 import com.sun.scenario.effect.compiler.tree.ArrayAccessExpr;
 import com.sun.scenario.effect.compiler.tree.BinaryExpr;
 import com.sun.scenario.effect.compiler.tree.BreakStmt;
@@ -41,6 +48,7 @@ import com.sun.scenario.effect.compiler.tree.ExprStmt;
 import com.sun.scenario.effect.compiler.tree.FieldSelectExpr;
 import com.sun.scenario.effect.compiler.tree.ForStmt;
 import com.sun.scenario.effect.compiler.tree.FuncDef;
+import com.sun.scenario.effect.compiler.tree.JSLCVisitor;
 import com.sun.scenario.effect.compiler.tree.LiteralExpr;
 import com.sun.scenario.effect.compiler.tree.ParenExpr;
 import com.sun.scenario.effect.compiler.tree.ProgramUnit;
@@ -59,6 +67,7 @@ import com.sun.scenario.effect.compiler.tree.WhileStmt;
 public abstract class SLBackend extends TreeScanner {
 
     private JSLParser parser;
+    protected JSLCVisitor visitor;
     private StringBuilder sb = new StringBuilder();
     private Variable unrollVar = null;
     private int unrollIndex = -1;
@@ -66,8 +75,9 @@ public abstract class SLBackend extends TreeScanner {
     protected boolean isVertexColorReferenced;
     protected int maxTexCoordIndex = -1;
 
-    protected SLBackend(JSLParser parser) {
+    protected SLBackend(JSLParser parser, JSLCVisitor visitor) {
         this.parser = parser;
+        this.visitor = visitor;
     }
 
     protected final void output(String s) {

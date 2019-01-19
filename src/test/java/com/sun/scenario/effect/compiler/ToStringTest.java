@@ -39,9 +39,6 @@ import static org.junit.Assert.assertEquals;
  */
 public class ToStringTest {
 
-    public ToStringTest() {
-    }
-
     static JSLC.ParserInfo compile(String s) throws Exception {
         File tmpfile = File.createTempFile("foo", null);
         File tmpdir = tmpfile.getParentFile();
@@ -49,7 +46,7 @@ public class ToStringTest {
         jslcinfo.outDir = tmpdir.getAbsolutePath();
         jslcinfo.shaderName = "Effect";
         jslcinfo.peerName = "Foo";
-        jslcinfo.outTypes = JSLC.OUT_ALL;
+        jslcinfo.outTypes = JSLC.OUT_D3D11;
         return JSLC.compile(jslcinfo, s, Long.MAX_VALUE);
     }
 
@@ -64,13 +61,14 @@ public class ToStringTest {
     }
 
     private void assertSame(String program, ProgramUnit programUnit) {
+        // We want to compare line-by-line but ignoring leading/trailing white space on each line.
         int[] num = {0};
         Map<Integer, String> expectedLines = program.lines().map(line -> new Line(num[0]++, line.strip()))
                 .collect(Collectors.toMap(Line::getNumber, Line::getLine));
         num[0] = 0;
         Map<Integer, String> actualLines = programUnit.toString().lines().map(line -> new Line(num[0]++, line.strip()))
                 .collect(Collectors.toMap(Line::getNumber, Line::getLine));
-        assertEquals("the two programs to be identical (minus whitespace)", expectedLines, actualLines);
+        assertEquals("the two programs to be line-by-line identical (minus whitespace)", expectedLines, actualLines);
     }
 
     private static class Line {

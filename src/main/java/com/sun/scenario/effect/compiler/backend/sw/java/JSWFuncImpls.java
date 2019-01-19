@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2019, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,6 +29,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.sun.scenario.effect.compiler.model.BinaryOpType;
 import com.sun.scenario.effect.compiler.model.CoreSymbols;
 import com.sun.scenario.effect.compiler.model.FuncImpl;
 import com.sun.scenario.effect.compiler.model.Function;
@@ -61,6 +63,16 @@ class JSWFuncImpls {
 
         // int intcast(float x)
         declareFunctionIntCast();
+
+        declareOverloadsAnyAll("any", BinaryOpType.OR);
+
+        declareOverloadsAnyAll("all", BinaryOpType.AND);
+
+        declareOverloadsBoolFloat("isFinite");
+
+        declareOverloadsBoolFloat("isInfinite");
+
+        declareOverloadsBoolFloat("isNaN");
 
         // <ftype> min(<ftype> x, <ftype> y)
         // <ftype> min(<ftype> x, float y)
@@ -99,14 +111,44 @@ class JSWFuncImpls {
         // <ftype> sin(<ftype> x)
         declareOverloadsSimple("sin", "(float)Math.sin(x_tmp$1)");
 
+        // <ftype> asin(<ftype> x)
+        declareOverloadsSimple("asin", "(float)Math.asin(x_tmp$1)");
+
+        // <ftype> sinh(<ftype> x)
+        declareOverloadsSimple("sinh", "(float)Math.sinh(x_tmp$1)");
+
         // <ftype> cos(<ftype> x)
         declareOverloadsSimple("cos", "(float)Math.cos(x_tmp$1)");
+
+        // <ftype> acos(<ftype> x)
+        declareOverloadsSimple("acos", "(float)Math.acos(x_tmp$1)");
+
+        // <ftype> cosh(<ftype> x)
+        declareOverloadsSimple("cosh", "(float)Math.cosh(x_tmp$1)");
 
         // <ftype> tan(<ftype> x)
         declareOverloadsSimple("tan", "(float)Math.tan(x_tmp$1)");
 
+        // <ftype> atan(<ftype> x)
+        declareOverloadsSimple("atan", "(float)Math.atan(x_tmp$1)");
+
+        // <ftype> atan2(<ftype> x, <ftype> y)
+        declareOverloadsSimple2("atan2", "(float)Math.atan2(x_tmp$1, y_tmp$2)");
+
+        // <ftype> tanh(<ftype> x)
+        declareOverloadsSimple("tanh", "(float)Math.tanh(x_tmp$1)");
+
+        // <ftype> degrees(<ftype> x)
+        declareOverloadsSimple("degrees", "(float)Math.toDegrees(x_tmp$1)");
+
+        // <ftype> radians(<ftype> x)
+        declareOverloadsSimple("radians", "(float)Math.toRadians(x_tmp$1)");
+
         // <ftype> pow(<ftype> x, <ftype> y)
         declareOverloadsSimple2("pow", "(float)Math.pow(x_tmp$1, y_tmp$2)");
+
+        // <ftype> exp(<ftype> x)
+        declareOverloadsSimple2("pow", "(float)Math.exp(x_tmp$1)");
 
         // <ftype> mod(<ftype> x, <ftype> y)
         // <ftype> mod(<ftype> x, float y)
@@ -114,6 +156,9 @@ class JSWFuncImpls {
 
         // float dot(<ftype> x, <ftype> y)
         declareOverloadsDot();
+
+        // float3 cross(float3 x, float3 y)
+        declareOverloadsCross();
 
         // float distance(<ftype> x, <ftype> y)
         declareOverloadsDistance();
@@ -126,10 +171,18 @@ class JSWFuncImpls {
         declareOverloadsNormalize();
 
         // <ftype> ddx(<ftype> p)
+        // TODO: http://www.aclockworkberry.com/shader-derivative-functions/
+        // https://forums.khronos.org/showthread.php/72758
+        // https://stackoverflow.com/questions/16365385/explanation-of-dfdx
+        // https://github.com/anholt/mesa/issues/12
         declareOverloadsSimple("ddx", "<ddx() not implemented for sw backends>");
 
         // <ftype> ddy(<ftype> p)
         declareOverloadsSimple("ddy", "<ddy() not implemented for sw backends>");
+
+        // <ftype> trunc(<ftype> x)
+        declareOverloadsSimple("trunc", "x_tmp$1 > 0 ? Math.floor(x_tmp$1) : Math.ceil(x_tmp$1)");
+
 
         // <ftype> fma(<ftype> x, <ftype> y, <ftype> z)
         declareOverloadsSimple3("fma", "(float)Math.fma(x_tmp$1, y_tmp$2, z_tmp$3)");
@@ -139,7 +192,8 @@ class JSWFuncImpls {
                                         String name, Type... ptypes) {
         Function f = CoreSymbols.getFunction(name, Arrays.asList(ptypes));
         if (f == null) {
-            throw new InternalError("Core function not found (have you declared the function in CoreSymbols?)");
+            throw new InternalError("Core function \"" + name + "\" not found (have you declared " +
+                    "the function in CoreSymbols?)");
         }
         funcs.put(f, impl);
     }
@@ -219,6 +273,49 @@ class JSWFuncImpls {
     private static void declareFunctionIntCast() {
         FuncImpl fimpl = (i, params) -> "((int)x_tmp)";
         declareFunction(fimpl, "intcast", FLOAT);
+    }
+
+    /**
+     * Used to declare any/all functions:
+     *    bool all(<btype> x)
+     *    bool any(<btype> x)
+     */
+    private static void declareOverloadsAnyAll(String funcName, BinaryOpType bType) {
+        for (Type type : new Type[] {BOOL, BOOL2, BOOL3, BOOL4}) {
+            int n = type.getNumFields();
+            String s;
+            if (n == 1) {
+                s = "Boolean.valueOf(x_tmp)";
+            } else {
+                s  = "Boolean.valueOf(x_tmp_x)";
+                s += "\n" + bType.getSymbol() + " Boolean.valueOf(x_tmp_y)";
+                if (n > 2) s += "\n" + bType.getSymbol() + " Boolean.valueOf(x_tmp_z)";
+                if (n > 3) s += "\n" + bType.getSymbol() + " Boolean.valueOf(x_tmp_w)";
+            }
+            final String str = s;
+            FuncImpl fimpl = (i, params) -> str;
+            declareFunction(fimpl, funcName, type);
+        }
+    }
+
+    /**
+     * Used to declare isFinite, isInfinite, isNaN functions:
+     *    <btype> isFinite(<ftype> x)
+     *    <btype> isInfinite(<ftype> x)
+     *    <btype> isNaN(<ftype> x)
+     */
+    private static void declareOverloadsBoolFloat(String name) {
+        String pattern = String.format("Float.%s(x_tmp$1)", name);
+        for (final Type type : new Type[] {FLOAT, FLOAT2, FLOAT3, FLOAT4}) {
+            final boolean useSuffix = (type != FLOAT);
+            FuncImpl fimpl = (i, params) -> {
+                String sfx = useSuffix ? JSWBackend.getSuffix(i) : "";
+                String s = pattern;
+                s = s.replace("$1", sfx);
+                return s;
+            };
+            declareFunction(fimpl, name, type);
+        }
     }
 
     /**
@@ -323,6 +420,9 @@ class JSWFuncImpls {
         for (final Type type : new Type[] {FLOAT, FLOAT2, FLOAT3, FLOAT4}) {
             int n = type.getNumFields();
             String s;
+            // TODO Extract functions like this (that reduce an argument type to a scalar) with
+            // some sort of class that has a combiningOperator member (in this case it would be +). These
+            // types of functions have a domain of dimension n >= 1 and co-domain of dimension 1.
             if (n == 1) {
                 s = "(x_tmp * y_tmp)";
             } else {
@@ -335,6 +435,28 @@ class JSWFuncImpls {
             FuncImpl fimpl = (i, params) -> str;
             declareFunction(fimpl, name, type, type);
         }
+    }
+
+    /**
+     * Used to declare cross functions of the following form:
+     *   float3 cross(<ftype> x, <ftype> y)
+     */
+    private static void declareOverloadsCross() {
+        final String name = "cross";
+        FuncImpl fimpl = (i, params) -> {
+            switch (i) {
+                case 0:
+                    return "(x_tmp_y * y_tmp_z) - (x_tmp_z * y_tmp_y)";
+                case 1:
+                    return "(x_tmp_z * y_tmp_x) - (x_tmp_x * y_tmp_z)";
+                case 2:
+                    return "(x_tmp_x * y_tmp_y) - (x_tmp_y * y_tmp_x)";
+                default:
+                    // Should never get this far as the function with wrong types won't be looked up.
+                    throw new RuntimeException("cross(x,y) called on non float3");
+            }
+        };
+        declareFunction(fimpl, name, FLOAT3, FLOAT3);
     }
 
     /**
@@ -410,6 +532,8 @@ class JSWFuncImpls {
 
         for (Type type : new Type[] {FLOAT, FLOAT2, FLOAT3, FLOAT4}) {
             // declare (vectype,vectype,vectype) variants
+            // TODO Extract functions like this into some sort of ComponentWise function impl class
+            // to reduce boilerplate (functions whose domain and co-domain have the same dimension).
             final boolean useSuffix = (type != FLOAT);
             FuncImpl fimpl = (i, params) -> {
                 String sfx = useSuffix ? JSWBackend.getSuffix(i) : "";
@@ -444,6 +568,7 @@ class JSWFuncImpls {
     private static void declareOverloadsSmoothstep() {
         final String name = "smoothstep";
         // TODO - the smoothstep function is defined to use Hermite interpolation
+        // https://en.wikipedia.org/wiki/Smoothstep
         final String pattern =
             "(val_tmp$1 < min_tmp$2) ? 0.0f : \n" +
             "(val_tmp$1 > max_tmp$2) ? 1.0f : \n" +

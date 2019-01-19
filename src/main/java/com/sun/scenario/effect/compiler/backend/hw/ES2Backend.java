@@ -30,14 +30,15 @@ import java.util.Map;
 import com.sun.scenario.effect.compiler.JSLParser;
 import com.sun.scenario.effect.compiler.model.Precision;
 import com.sun.scenario.effect.compiler.tree.FuncDef;
+import com.sun.scenario.effect.compiler.tree.JSLCVisitor;
 import com.sun.scenario.effect.compiler.tree.ProgramUnit;
 
 /**
  */
 public class ES2Backend extends GLSLBackend {
 
-    public ES2Backend(JSLParser parser) {
-        super(parser);
+    public ES2Backend(JSLParser parser, JSLCVisitor visitor) {
+        super(parser, visitor);
     }
 
     // GLSL v1.10 no longer has gl_TexCoord*; these are now passed in
@@ -52,6 +53,7 @@ public class ES2Backend extends GLSLBackend {
 
     private static final Map<String, String> funcMap = new HashMap<String, String>();
     static {
+        // Note: Only functions that are different need to be added here.
         funcMap.put("sample", "texture2D");
         funcMap.put("ddx", "dFdx");
         funcMap.put("ddy", "dFdy");
@@ -61,13 +63,13 @@ public class ES2Backend extends GLSLBackend {
     @Override
     protected String getVar(String v) {
         String s = varMap.get(v);
-        return (s != null) ? s : v;
+        return s != null ? s : v;
     }
 
     @Override
     protected String getFuncName(String f) {
         String s = funcMap.get(f);
-        return (s != null) ? s : f;
+        return s != null ? s : f;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2019, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -31,7 +31,9 @@ import com.sun.scenario.effect.compiler.tree.Expr;
 /**
  * A function which transforms a {@code String} containing a function implementation with
  * template arguments (such as {@literal x_tmp$1}) to a {@code String} containing a function
- * implementation with the given parameters.
+ * implementation with the given parameters. The implementation will be specific to which
+ * backend is implementing the function (i.e. Java for JSWBackend, C for SSEBackend,
+ * HLSL for HLSLBackend, etc.).
  */
 public interface FuncImpl {
     default String getPreamble(List<Expr> params) {

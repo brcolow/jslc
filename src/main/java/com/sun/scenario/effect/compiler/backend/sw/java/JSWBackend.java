@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2019, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,35 +25,44 @@
 
 package com.sun.scenario.effect.compiler.backend.sw.java;
 
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import com.sun.scenario.effect.compiler.JSLParser;
-import com.sun.scenario.effect.compiler.model.*;
+import com.sun.scenario.effect.compiler.model.BaseType;
+import com.sun.scenario.effect.compiler.model.Qualifier;
+import com.sun.scenario.effect.compiler.model.Type;
+import com.sun.scenario.effect.compiler.model.Types;
+import com.sun.scenario.effect.compiler.model.Variable;
 import com.sun.scenario.effect.compiler.tree.FuncDef;
+import com.sun.scenario.effect.compiler.tree.JSLCVisitor;
 import com.sun.scenario.effect.compiler.tree.ProgramUnit;
 import com.sun.scenario.effect.compiler.tree.TreeScanner;
-import org.antlr.stringtemplate.StringTemplate;
-import org.antlr.stringtemplate.StringTemplateGroup;
-import org.antlr.stringtemplate.language.DefaultTemplateLexer;
+import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STGroup;
+import org.stringtemplate.v4.STGroupFile;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  */
 public class JSWBackend extends TreeScanner {
 
     private final JSLParser parser;
+    private final JSLCVisitor visitor;
     private final String body;
+    private final Map<String, String> typeMap = new HashMap<>();
+    private final Map<String, FuncDef> funcDefs = new HashMap<>();
+    private final Set<String> resultVars = new HashSet<>();
+    private final StringBuilder usercode = new StringBuilder();
 
-    public JSWBackend(JSLParser parser, ProgramUnit program) {
-        // TODO: will be removed once we clean up static usage
-        resetStatics();
-
+    public JSWBackend(JSLParser parser, JSLCVisitor visitor, ProgramUnit program) {
         this.parser = parser;
-
-        JSWTreeScanner scanner = new JSWTreeScanner();
+        this.visitor = visitor;
+        typeMap.put("bool", "boolean");
+        JSWTreeScanner scanner = new JSWTreeScanner(this);
         scanner.scan(program);
         this.body = scanner.getResult();
     }
@@ -61,9 +70,8 @@ public class JSWBackend extends TreeScanner {
     public final String getGenCode(String effectName,
                                    String peerName,
                                    String genericsName,
-                                   String interfaceName)
-    {
-        Map<String, Variable> vars = parser.getSymbolTable().getGlobalVariables();
+                                   String interfaceName) {
+        Map<String, Variable> vars = visitor.getSymbolTable().getGlobalVariables();
         StringBuilder genericsDecl = new StringBuilder();
         StringBuilder interfaceDecl = new StringBuilder();
         StringBuilder constants = new StringBuilder();
@@ -216,33 +224,48 @@ public class JSWBackend extends TreeScanner {
             interfaceDecl.append("implements "+interfaceName);
         }
 
-        Reader template = new InputStreamReader(getClass().getResourceAsStream("JSWGlue.stg"));
-        StringTemplateGroup group = new StringTemplateGroup(template, DefaultTemplateLexer.class);
-        StringTemplate glue = group.getInstanceOf("glue");
-        glue.setAttribute("effectName", effectName);
-        glue.setAttribute("peerName", peerName);
-        glue.setAttribute("genericsDecl", genericsDecl.toString());
-        glue.setAttribute("interfaceDecl", interfaceDecl.toString());
-        glue.setAttribute("usercode", usercode.toString());
-        glue.setAttribute("samplers", samplers.toString());
-        glue.setAttribute("cleanup", cleanup.toString());
-        glue.setAttribute("srcRects", srcRects.toString());
-        glue.setAttribute("constants", constants.toString());
-        glue.setAttribute("posDecls", posDecls.toString());
-        glue.setAttribute("pixInitY", pixInitY.toString());
-        glue.setAttribute("pixInitX", pixInitX.toString());
-        glue.setAttribute("posIncrY", posIncrY.toString());
-        glue.setAttribute("posInitY", posInitY.toString());
-        glue.setAttribute("posIncrX", posIncrX.toString());
-        glue.setAttribute("posInitX", posInitX.toString());
-        glue.setAttribute("body", body);
-        return glue.toString();
+        STGroup group = new STGroupFile(getClass().getResource("JSWGlue.st"), UTF_8.displayName(), '$', '$');
+        ST glue = group.getInstanceOf("glue");
+        glue.add("effectName", effectName);
+        glue.add("peerName", peerName);
+        glue.add("genericsDecl", genericsDecl.toString());
+        glue.add("interfaceDecl", interfaceDecl.toString());
+        glue.add("usercode", usercode.toString());
+        glue.add("samplers", samplers.toString());
+        glue.add("cleanup", cleanup.toString());
+        glue.add("srcRects", srcRects.toString());
+        glue.add("constants", constants.toString());
+        glue.add("posDecls", posDecls.toString());
+        glue.add("pixInitY", pixInitY.toString());
+        glue.add("pixInitX", pixInitX.toString());
+        glue.add("posIncrY", posIncrY.toString());
+        glue.add("posInitY", posInitY.toString());
+        glue.add("posIncrX", posIncrX.toString());
+        glue.add("posInitX", posInitX.toString());
+        glue.add("body", body);
+        return glue.render();
     }
 
-    // TODO: need better mechanism for querying fields
+    protected String getBody() {
+        return body;
+    }
+
     private static char[] fields = {'x', 'y', 'z', 'w'};
     public static String getSuffix(int i) {
-        return "_" + fields[i];
+        if (i < 0 || i > 26 * 26) {
+            throw new IllegalArgumentException("index must be in range [0, 676] but was: " + i);
+        }
+        if (i < 4) {
+            // FIXME: if i < 2: return "_" + ((char) ('x' + i));
+            //          if i < 3 return "_w" ?
+            return "_" + fields[i];
+        } else if (i < 26) {
+            return "_" + (char) (i + 'a' - 4); // After 4, start spitting out beginning of alphabet.
+        } else {
+            char firstLetter = (char) ((i/26) + 'a' - 1);
+            char secondLetter = (char) (i % 26 + 'a');
+            return "_" + firstLetter + secondLetter;
+        }
     }
 
     static int getFieldIndex(char field) {
@@ -264,31 +287,26 @@ public class JSWBackend extends TreeScanner {
         }
     }
 
-    // TODO: these shouldn't be implemented as a static method
-    private static Map<String, FuncDef> funcDefs = new HashMap<String, FuncDef>();
-    static void putFuncDef(FuncDef def) {
+    void putFuncDef(FuncDef def) {
         funcDefs.put(def.getFunction().getName(), def);
     }
-    static FuncDef getFuncDef(String name) {
+    FuncDef getFuncDef(String name) {
         return funcDefs.get(name);
     }
 
-    private static Set<String> resultVars = new HashSet<String>();
-    static boolean isResultVarDeclared(String vname) {
+    boolean isResultVarDeclared(String vname) {
         return resultVars.contains(vname);
     }
-    static void declareResultVar(String vname) {
+    void declareResultVar(String vname) {
         resultVars.add(vname);
     }
 
-    private static StringBuilder usercode = new StringBuilder();
-    static void addGlueBlock(String block) {
+    void addGlueBlock(String block) {
         usercode.append(block);
     }
 
-    private static void resetStatics() {
-        funcDefs.clear();
-        resultVars.clear();
-        usercode = new StringBuilder();
+    String getType(String type) {
+        String t = typeMap.get(type);
+        return t != null ? t : type;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2019, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,6 +29,10 @@ import com.sun.scenario.effect.compiler.model.Function;
 import com.sun.scenario.effect.compiler.model.Type;
 import com.sun.scenario.effect.compiler.model.Variable;
 import com.sun.scenario.effect.compiler.tree.*;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import static com.sun.scenario.effect.compiler.backend.sw.java.JSWBackend.getFieldIndex;
 import static com.sun.scenario.effect.compiler.backend.sw.java.JSWBackend.getSuffix;
 
@@ -36,19 +40,20 @@ import static com.sun.scenario.effect.compiler.backend.sw.java.JSWBackend.getSuf
  */
 class JSWTreeScanner extends TreeScanner {
 
+    private final JSWBackend backend;
     private final String funcName;
     private final StringBuilder sb = new StringBuilder();
-
     private boolean inVectorOp = false;
     private int vectorIndex = 0;
     private boolean inFieldSelect = false;
     private char selectedField = 'x';
 
-    JSWTreeScanner() {
-        this(null);
+    JSWTreeScanner(JSWBackend backend) {
+        this(backend,null);
     }
 
-    JSWTreeScanner(String funcName) {
+    JSWTreeScanner(JSWBackend backend, String funcName) {
+        this.backend = backend;
         this.funcName = funcName;
     }
 
@@ -187,13 +192,13 @@ class JSWTreeScanner extends TreeScanner {
         } else {
             // TODO: this is a hacky approach to saving func defs, which
             // will be inlined later at point of use)...
-            JSWBackend.putFuncDef(d);
+            backend.putFuncDef(d);
         }
     }
 
     @Override
     public void visitGlueBlock(GlueBlock b) {
-        JSWBackend.addGlueBlock(b.getText());
+        backend.addGlueBlock(b.getText());
     }
 
     @Override
@@ -276,7 +281,7 @@ class JSWTreeScanner extends TreeScanner {
         if (t.isVector()) {
             inVectorOp = true;
             for (int i = 0; i < t.getNumFields(); i++) {
-                output(t.getBaseType().toString() + " ");
+                output(backend.getType(t.getBaseType().toString()) + " ");
                 output(var.getName() + getSuffix(i));
                 Expr init = d.getInit();
                 if (init != null) {
@@ -288,7 +293,7 @@ class JSWTreeScanner extends TreeScanner {
             }
             inVectorOp = false;
         } else {
-            output(t.toString() + " " + var.getName());
+            output(backend.getType(t.toString()) + " " + var.getName());
             Expr init = d.getInit();
             if (init != null) {
                 output(" = ");
@@ -332,7 +337,7 @@ class JSWTreeScanner extends TreeScanner {
     }
 
     private void outputPreambles(Tree tree) {
-        JSWCallScanner scanner = new JSWCallScanner();
+        JSWCallScanner scanner = new JSWCallScanner(backend);
         scanner.scan(tree);
         String res = scanner.getResult();
         if (res != null) {

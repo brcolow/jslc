@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2019, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -124,6 +124,8 @@ import static com.sun.scenario.effect.compiler.backend.sw.java.JSWBackend.*;
  *     float val = scale * clamp_res;
  */
 class JSWCallScanner extends TreeScanner {
+
+    private final JSWBackend backend;
     private StringBuilder sb;
     private boolean inCallExpr = false;
     private Set<Integer> selectedFields = null;
@@ -131,6 +133,10 @@ class JSWCallScanner extends TreeScanner {
     private char selectedField = 'x';
     private boolean inVectorOp = false;
     private int vectorIndex = 0;
+
+    JSWCallScanner(JSWBackend backend) {
+        this.backend = backend;
+    }
 
     private void output(String s) {
         if (sb == null) {
@@ -156,21 +162,21 @@ class JSWCallScanner extends TreeScanner {
         Set<Integer> fields = selectedFields;
         if (t.isVector()) {
             if (fields == null) {
-                fields = new HashSet<Integer>();
+                fields = new HashSet<>();
                 for (int i = 0; i < t.getNumFields(); i++) {
                     fields.add(i);
                 }
             }
         }
-        if (!JSWBackend.isResultVarDeclared(vname)) {
+        if (!backend.isResultVarDeclared(vname)) {
             // only declare result variables if they haven't been already
             // TODO: there's a bug here; suppose a function like
             // min(float,float) is inlined, then later we inline
             // min(float3,float3), the second time we'll think we already have
             // declared the result variables, but min_res_y/z won't be there...
-            JSWBackend.declareResultVar(vname);
+            backend.declareResultVar(vname);
             if (t.isVector()) {
-                output(vtype + " ");
+                output(backend.getType(vtype) + " ");
                 boolean first = true;
                 for (Integer f : fields) {
                     if (first) {
@@ -182,7 +188,7 @@ class JSWCallScanner extends TreeScanner {
                 }
                 output(";\n");
             } else {
-                output(vtype + " " + vname + "_res;\n");
+                output(backend.getType(vtype) + " " + vname + "_res;\n");
             }
         }
 
@@ -203,7 +209,7 @@ class JSWCallScanner extends TreeScanner {
                 inVectorOp = true;
                 for (int j = 0; j < ptype.getNumFields(); j++) {
                     vectorIndex = j;
-                    output(pbasetype.toString());
+                    output(backend.getType(pbasetype.toString()));
                     output(" ");
                     output(pname + "_tmp" + getSuffix(j) + " = ");
                     scan(argExprs.get(i));
@@ -211,7 +217,7 @@ class JSWCallScanner extends TreeScanner {
                 }
                 inVectorOp = false;
             } else {
-                output(pbasetype.toString());
+                output(backend.getType(pbasetype.toString()));
                 output(" ");
                 output(pname + "_tmp = ");
                 scan(argExprs.get(i));
@@ -240,8 +246,8 @@ class JSWCallScanner extends TreeScanner {
             }
         } else {
             // user-defined function
-            JSWTreeScanner scanner = new JSWTreeScanner(func.getName());
-            scanner.scan(JSWBackend.getFuncDef(func.getName()).getStmt());
+            JSWTreeScanner scanner = new JSWTreeScanner(backend, func.getName());
+            scanner.scan(backend.getFuncDef(func.getName()).getStmt());
             output(scanner.getResult());
         }
 
@@ -253,8 +259,7 @@ class JSWCallScanner extends TreeScanner {
     public void visitArrayAccessExpr(ArrayAccessExpr e) {
         if (inCallExpr) {
             if (e.getExpr() instanceof VariableExpr &&
-                e.getIndex() instanceof VariableExpr)
-            {
+                e.getIndex() instanceof VariableExpr) {
                 VariableExpr ve = (VariableExpr)e.getExpr();
                 VariableExpr ie = (VariableExpr)e.getIndex();
                 output(ve.getVariable().getName());
@@ -300,7 +305,7 @@ class JSWCallScanner extends TreeScanner {
     }
 
     private static Set<Integer> getFieldSet(String fields) {
-        Set<Integer> fieldSet = new HashSet<Integer>();
+        Set<Integer> fieldSet = new HashSet<>();
         for (int i = 0; i < fields.length(); i++) {
             fieldSet.add(getFieldIndex(fields.charAt(i)));
         }

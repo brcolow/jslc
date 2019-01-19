@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2019, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -30,9 +30,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.sun.scenario.effect.compiler.model.*;
+import com.sun.scenario.effect.compiler.model.BaseType;
+import com.sun.scenario.effect.compiler.model.BinaryOpType;
+import com.sun.scenario.effect.compiler.model.Function;
+import com.sun.scenario.effect.compiler.model.Qualifier;
+import com.sun.scenario.effect.compiler.model.SymbolTable;
+import com.sun.scenario.effect.compiler.model.Type;
+import com.sun.scenario.effect.compiler.model.Types;
+import com.sun.scenario.effect.compiler.model.UnaryOpType;
+import com.sun.scenario.effect.compiler.model.Variable;
 
-import static com.sun.scenario.effect.compiler.model.Types.*;
+import static com.sun.scenario.effect.compiler.model.Types.BOOL;
+import static com.sun.scenario.effect.compiler.model.Types.FLOAT;
+import static com.sun.scenario.effect.compiler.model.Types.INT;
 
 /**
  */
@@ -125,6 +135,7 @@ public class TreeMaker {
         BaseType baseType = type.getBaseType();
         for (Expr param : params) {
             if (baseType != param.getResultType().getBaseType()) {
+                // TODO: Here we could down-cast to allow for things like float3(1,2,3)
                 throw new RuntimeException("Arguments to " + type + " constructor must be of base type " + baseType);
             }
         }
@@ -210,8 +221,7 @@ public class TreeMaker {
     }
 
     public ForStmt forStmt(Stmt init, Expr cond, Expr expr, Stmt stmt,
-                           int unrollMax, int unrollCheck)
-    {
+                           int unrollMax, int unrollCheck) {
         if (cond != null && cond.getResultType() != Types.BOOL) {
             throw new RuntimeException("Condition for 'for' loop must be a boolean expression");
         }

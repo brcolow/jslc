@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2019, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,14 +26,10 @@
 package com.sun.scenario.effect.compiler.parser;
 
 import com.sun.scenario.effect.compiler.JSLParser;
-import com.sun.scenario.effect.compiler.tree.BreakStmt;
-import com.sun.scenario.effect.compiler.tree.ContinueStmt;
-import com.sun.scenario.effect.compiler.tree.DiscardStmt;
-import com.sun.scenario.effect.compiler.tree.LiteralExpr;
-import com.sun.scenario.effect.compiler.tree.ReturnStmt;
-import com.sun.scenario.effect.compiler.tree.Stmt;
-import org.antlr.runtime.RecognitionException;
+import com.sun.scenario.effect.compiler.tree.*;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -75,13 +71,14 @@ public class JumpStatementTest extends ParserBase {
         assertEquals(3, lit.getValue());
     }
 
-    @Test(expected = RecognitionException.class)
+    @Test(expected = ParseCancellationException.class)
     public void notAJump() throws Exception {
         parseTreeFor("float;");
     }
 
-    private Stmt parseTreeFor(String text) throws RecognitionException {
+    private Stmt parseTreeFor(String text) throws Exception {
         JSLParser parser = parserOver(text);
-        return parser.jump_statement();
+        JSLCVisitor visitor = new JSLCVisitor();
+        return visitor.visitJump_statement(parser.jump_statement());
     }
 }

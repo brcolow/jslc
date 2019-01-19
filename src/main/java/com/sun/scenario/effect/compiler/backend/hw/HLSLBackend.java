@@ -29,9 +29,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sun.scenario.effect.compiler.JSLParser;
-import com.sun.scenario.effect.compiler.model.*;
+import com.sun.scenario.effect.compiler.model.BaseType;
+import com.sun.scenario.effect.compiler.model.Function;
+import com.sun.scenario.effect.compiler.model.Qualifier;
+import com.sun.scenario.effect.compiler.model.Type;
+import com.sun.scenario.effect.compiler.model.Types;
+import com.sun.scenario.effect.compiler.model.Variable;
 import com.sun.scenario.effect.compiler.tree.Expr;
 import com.sun.scenario.effect.compiler.tree.FuncDef;
+import com.sun.scenario.effect.compiler.tree.JSLCVisitor;
 import com.sun.scenario.effect.compiler.tree.VarDecl;
 
 /**
@@ -41,11 +47,11 @@ public class HLSLBackend extends SLBackend {
     private final ShaderModel shaderModel;
     private final Map<String, String> typeMap = new HashMap<>();
     private final Map<String, String> qualMap = new HashMap<>();
-    private final Map<String, String> funcMap = new HashMap<>();
+    private final Map<String, HLSLFunction> funcMap = new HashMap<>();
     private final Map<String, String> varMap = new HashMap<>();
 
-    public HLSLBackend(JSLParser parser, ShaderModel shaderModel) {
-        super(parser);
+    public HLSLBackend(JSLParser parser, JSLCVisitor visitor, ShaderModel shaderModel) {
+        super(parser, visitor);
         this.shaderModel = shaderModel;
         initTypeMap();
         initQualMap();
@@ -104,21 +110,73 @@ public class HLSLBackend extends SLBackend {
     }
 
     private void initFuncMap() {
-        if (shaderModel.supports(ShaderModel.SM3)) {
-            funcMap.put("sample", "tex2D");
-            funcMap.put("fract", "frac");
-            funcMap.put("mix", "lerp");
-            funcMap.put("mod", "fmod");
-            funcMap.put("intcast", "int");
-            funcMap.put("any", "any");
-            funcMap.put("length", "length");
-        }
-        if (shaderModel.supports(ShaderModel.SM5_0)) {
+        // All HLSL builtin functions must be added here (not just one's with different names).
+        funcMap.put("abs",        new HLSLFunction("abs", ShaderModel.SM3));
+        funcMap.put("acos",       new HLSLFunction("acos", ShaderModel.SM3));
+        funcMap.put("all",        new HLSLFunction("all", ShaderModel.SM3));
+        funcMap.put("any",        new HLSLFunction("any", ShaderModel.SM3));
+        funcMap.put("asin",       new HLSLFunction("asin", ShaderModel.SM3));
+        funcMap.put("atan",       new HLSLFunction("atan", ShaderModel.SM3));
+        funcMap.put("atan2",      new HLSLFunction("atan2", ShaderModel.SM3));
+        funcMap.put("ceil",       new HLSLFunction("ceil", ShaderModel.SM3));
+        funcMap.put("clamp",      new HLSLFunction("clamp", ShaderModel.SM3));
+        // clip
+        funcMap.put("cos",        new HLSLFunction("cos", ShaderModel.SM3));
+        funcMap.put("cosh",       new HLSLFunction("cosh", ShaderModel.SM3));
+        funcMap.put("cross",      new HLSLFunction("cross", ShaderModel.SM3));
+        funcMap.put("ddx",        new HLSLFunction("ddx", ShaderModel.SM3));
+        funcMap.put("ddy",        new HLSLFunction("ddy", ShaderModel.SM3));
+        funcMap.put("degrees",    new HLSLFunction("degrees", ShaderModel.SM3));
+        // determinant
+        funcMap.put("distance",   new HLSLFunction("distance", ShaderModel.SM3));
+        funcMap.put("dot",        new HLSLFunction("dot", ShaderModel.SM3));
+        funcMap.put("exp",        new HLSLFunction("exp", ShaderModel.SM3));
+        // exp2
+        // faceforward
+        funcMap.put("floor",      new HLSLFunction("floor", ShaderModel.SM3));
+        funcMap.put("mod",        new HLSLFunction("fmod", ShaderModel.SM3));
+        funcMap.put("fract",      new HLSLFunction("frac", ShaderModel.SM3));
+        // frexp https://github.com/jythontools/jython/blob/master/src/org/python/modules/math.java
+        // fwidth
+        funcMap.put("intcast",    new HLSLFunction("int", ShaderModel.SM3));
+        funcMap.put("isFinite",   new HLSLFunction("isfinite", ShaderModel.SM3));
+        funcMap.put("isInfinite", new HLSLFunction("isinf", ShaderModel.SM3));
+        funcMap.put("isNaN",      new HLSLFunction("isnan", ShaderModel.SM3));
+        // ldexp https://github.com/jythontools/jython/blob/master/src/org/python/modules/math.java
+        funcMap.put("length",     new HLSLFunction("length", ShaderModel.SM3));
+        funcMap.put("mix",        new HLSLFunction("lerp", ShaderModel.SM3));
+        // lit
+        // log
+        // log10
+        // log2
+        funcMap.put("max",        new HLSLFunction("max", ShaderModel.SM3));
+        funcMap.put("min",        new HLSLFunction("min", ShaderModel.SM3));
+        // modf
+        // mul
+        // noise
+        funcMap.put("normalize",  new HLSLFunction("normalize", ShaderModel.SM3));
+        funcMap.put("pow",        new HLSLFunction("pow", ShaderModel.SM3));
+        funcMap.put("radians",    new HLSLFunction("radians", ShaderModel.SM3));
+        // reflect
+        // refract
+        // round
+        // rsqrt
+        // saturate
+        funcMap.put("sign",       new HLSLFunction("sign", ShaderModel.SM3));
+        funcMap.put("sin",        new HLSLFunction("sin", ShaderModel.SM3));
+        // sincos
+        funcMap.put("sinh",       new HLSLFunction("sinh", ShaderModel.SM3));
+        funcMap.put("smoothstep", new HLSLFunction("smoothstep", ShaderModel.SM3));
+        funcMap.put("sqrt",       new HLSLFunction("sqrt", ShaderModel.SM3));
+        // step
+        funcMap.put("tan",        new HLSLFunction("tan", ShaderModel.SM3));
+        funcMap.put("tanh",       new HLSLFunction("tanh", ShaderModel.SM3));
+        // tex1D/3D/CUBE
+        funcMap.put("sample",     new HLSLFunction("tex2D", ShaderModel.SM3));
+        // transpose
+        // trunc
 
-        }
-        if (shaderModel.supports(ShaderModel.SM5_1)) {
-
-        }
+        funcMap.put("fma", new HLSLFunction("fma", ShaderModel.SM5_0));
     }
 
     @Override
@@ -138,9 +196,19 @@ public class HLSLBackend extends SLBackend {
     }
 
     @Override
-    protected String getFuncName(String f) {
-        String s = funcMap.get(f);
-        return (s != null) ? s : f;
+    protected String getFuncName(String funcName) {
+        HLSLFunction hlslFunction = funcMap.get(funcName);
+        if (hlslFunction != null) {
+            // This is a builtin (intrinsic) function, check that it is supported in this shader model.
+            if (!shaderModel.supports(hlslFunction.minSupportedModel)) {
+                throw new IllegalArgumentException("builtin function \"" + funcName +
+                        "\" is not supported for shader model: " + shaderModel);
+            }
+
+            return hlslFunction.name;
+        } else {
+            return funcName;
+        }
     }
 
     @Override
@@ -233,6 +301,16 @@ public class HLSLBackend extends SLBackend {
             output("\n");
         } else {
             output(";\n");
+        }
+    }
+
+    private static final class HLSLFunction {
+        private final String name;
+        private final ShaderModel minSupportedModel;
+
+        HLSLFunction(String name, ShaderModel minSupportedModel) {
+            this.name = name;
+            this.minSupportedModel = minSupportedModel;
         }
     }
 }

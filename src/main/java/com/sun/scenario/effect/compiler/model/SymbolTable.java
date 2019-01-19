@@ -168,8 +168,7 @@ public class SymbolTable {
 
     static Function getFunctionForSignature(Set<Function> funcs,
                                             String name,
-                                            List<Type> ptypes)
-    {
+                                            List<Type> ptypes) {
         for (Function f : funcs) {
             List<Param> params = f.getParams();
             if (name.equals(f.getName()) && params.size() == ptypes.size()) {
