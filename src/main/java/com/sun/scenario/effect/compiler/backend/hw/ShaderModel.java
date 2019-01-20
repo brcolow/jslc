@@ -22,23 +22,37 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package com.sun.scenario.effect.compiler.model;
+package com.sun.scenario.effect.compiler.backend.hw;
 
-import java.util.List;
-
-public class BuiltinFunction extends Function {
-    private final int minSupportedVersion;
-    
+public enum ShaderModel {
     /**
-     * Maybe delete minSupportedVersionbecause I think no classes in the "model" package
-     * should be version aware - that should only be handled in the backend.
+     * The pipeline supports Shader Model 3 features, including Pixel Shader
+     * 3.0 and Vertex Shader 3.0 programs.
      */
-    BuiltinFunction(String name, Type returnType, List<Param> params, int minSupportedVersion) {
-        super(name, returnType, params, false);
-        this.minSupportedVersion = minSupportedVersion;
+    SM3(3.0),
+    /**
+     * The pipeline supports Shader Model 5 features, including Pixel Shader
+     * 4.0 and Vertex Shader 4.0 programs.
+     */
+    SM4_0(4.0),
+    /**
+     * The pipeline supports Shader Model 5 features, including Pixel Shader
+     * 5.0 and Vertex Shader 5.0 programs.
+     */
+    SM5_0(5.0),
+    /**
+     * The pipeline supports Shader Model 5 features, including Pixel Shader
+     * 5.1 and Vertex Shader 5.1 programs.
+     */
+    SM5_1(5.1);
+
+    private final double version;
+
+    ShaderModel(double version) {
+        this.version = version;
     }
 
-    public int getMinSupportedVersion() {
-        return minSupportedVersion;
+    public boolean supports(ShaderModel other) {
+        return version >= other.version;
     }
 }

@@ -83,6 +83,9 @@ public class Function {
             return false;
         }
         final Function other = (Function) obj;
+        // Equality should not care whether or not this is a builtin or user function
+        // so that we can check if a function has been declared via:
+        // funcSet.contains(new Function(name, returnType, params))
         return Objects.equals(name, other.name) &&
                 returnType == other.returnType &&
                 Objects.equals(params, other.params);

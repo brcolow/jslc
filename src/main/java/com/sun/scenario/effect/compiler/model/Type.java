@@ -32,24 +32,6 @@ import java.util.Objects;
 /**
  */
 public class Type {
-
-    public static final Type VOID = new Type(BaseType.VOID, "void", 1);
-    public static final Type FLOAT = new Type(BaseType.FLOAT, "float", 1);
-    public static final Type FLOAT2 = new Type(BaseType.FLOAT, "float2", 2);
-    public static final Type FLOAT3 = new Type(BaseType.FLOAT, "float3", 3);
-    public static final Type FLOAT4 = new Type(BaseType.FLOAT, "float4", 4);
-    public static final Type INT = new Type(BaseType.INT, "int", 1);
-    public static final Type INT2 = new Type(BaseType.INT, "int2", 2);
-    public static final Type INT3 = new Type(BaseType.INT, "int3", 3);
-    public static final Type INT4 = new Type(BaseType.INT, "int4", 4);
-    public static final Type BOOL = new Type(BaseType.BOOL, "bool", 1);
-    public static final Type BOOL2 = new Type(BaseType.BOOL, "bool2", 1);
-    public static final Type BOOL3 = new Type(BaseType.BOOL, "bool3", 1);
-    public static final Type BOOL4 = new Type(BaseType.BOOL, "bool4", 1);
-    public static final Type SAMPLER = new Type(BaseType.SAMPLER, "sampler", 1);
-    public static final Type LSAMPLER = new Type(BaseType.SAMPLER, "lsampler", 1);
-    public static final Type FSAMPLER = new Type(BaseType.SAMPLER, "fsampler", 1);
-
     private final BaseType baseType;
     private final String name;
     private final int numFields;
@@ -77,8 +59,9 @@ public class Type {
     }
 
     public static List<Type> types() {
-        return List.of(VOID, FLOAT, FLOAT2, FLOAT3, FLOAT4, INT, INT2, INT3, INT4,
-                BOOL, BOOL2, BOOL3, BOOL4, SAMPLER, LSAMPLER, FSAMPLER);
+        return List.of(Types.VOID, Types.FLOAT, Types.FLOAT2, Types.FLOAT3, Types.FLOAT4, Types.INT, Types.INT2,
+                Types.INT3, Types.INT4, Types.BOOL, Types.BOOL2, Types.BOOL3, Types.BOOL4, Types.SAMPLER,
+                Types.LSAMPLER, Types.FSAMPLER);
     }
 
     /**
@@ -88,37 +71,37 @@ public class Type {
     public static Type fromToken(String s) {
         switch (s) {
             case "void":
-                return VOID;
+                return Types.VOID;
             case "float":
-                return FLOAT;
+                return Types.FLOAT;
             case "float2":
-                return FLOAT2;
+                return Types.FLOAT2;
             case "float3":
-                return FLOAT3;
+                return Types.FLOAT3;
             case "float4":
-                return FLOAT4;
+                return Types.FLOAT4;
             case "int":
-                return INT;
+                return Types.INT;
             case "int2":
-                return INT2;
+                return Types.INT2;
             case "int3":
-                return INT3;
+                return Types.INT3;
             case "int4":
-                return INT4;
+                return Types.INT4;
             case "bool":
-                return BOOL;
+                return Types.BOOL;
             case "bool2":
-                return BOOL2;
+                return Types.BOOL2;
             case "bool3":
-                return BOOL3;
+                return Types.BOOL3;
             case "bool4":
-                return BOOL4;
+                return Types.BOOL4;
             case "sampler":
-                return SAMPLER;
+                return Types.SAMPLER;
             case "lsampler":
-                return LSAMPLER;
+                return Types.LSAMPLER;
             case "fsampler":
-                return FSAMPLER;
+                return Types.FSAMPLER;
             default:
                 throw new IllegalArgumentException("could not get type from token: " + s);
         }

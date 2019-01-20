@@ -40,12 +40,12 @@ public class AssignmentExprTest extends ParserBase {
     @Test
     public void userVar() throws Exception {
         BinaryExpr tree = parseTreeFor("foo = 32.0");
-        assertEquals(Type.FLOAT, tree.getResultType());
+        assertEquals(Types.FLOAT, tree.getResultType());
         assertEquals(BinaryOpType.EQ, tree.getOp());
         assertEquals(VariableExpr.class, tree.getLeft().getClass());
         Variable var = ((VariableExpr) tree.getLeft()).getVariable();
         assertEquals("foo", var.getName());
-        assertEquals(Type.FLOAT, tree.getRight().getResultType());
+        assertEquals(Types.FLOAT, tree.getRight().getResultType());
         assertEquals(LiteralExpr.class, tree.getRight().getClass());
         Object val = ((LiteralExpr) tree.getRight()).getValue();
         assertEquals(32.0f, val);
@@ -59,12 +59,12 @@ public class AssignmentExprTest extends ParserBase {
     @Test
     public void coreVar() throws Exception {
         BinaryExpr tree = parseTreeFor("color = float4(1.0)");
-        assertEquals(Type.FLOAT4, tree.getResultType());
+        assertEquals(Types.FLOAT4, tree.getResultType());
         assertEquals(BinaryOpType.EQ, tree.getOp());
         assertEquals(VariableExpr.class, tree.getLeft().getClass());
         Variable var = ((VariableExpr) tree.getLeft()).getVariable();
         assertEquals("color", var.getName());
-        assertEquals(Type.FLOAT4, tree.getRight().getResultType());
+        assertEquals(Types.FLOAT4, tree.getRight().getResultType());
         assertEquals(VectorCtorExpr.class, tree.getRight().getClass());
         List<Expr> params = ((VectorCtorExpr) tree.getRight()).getParams();
 
@@ -72,7 +72,7 @@ public class AssignmentExprTest extends ParserBase {
 
         for (int i = 0; i < 4; i++) {
             Object val = ((LiteralExpr) params.get(i)).getValue();
-            assertEquals(Type.FLOAT, params.get(i).getResultType());
+            assertEquals(Types.FLOAT, params.get(i).getResultType());
             assertEquals(1.0f, val);
         }
     }
@@ -80,12 +80,12 @@ public class AssignmentExprTest extends ParserBase {
     @Test
     public void coreVarField() throws Exception {
         BinaryExpr tree = parseTreeFor("color.r = 3.0");
-        assertEquals(Type.FLOAT, tree.getResultType());
+        assertEquals(Types.FLOAT, tree.getResultType());
         assertEquals(BinaryOpType.EQ, tree.getOp());
         assertEquals(FieldSelectExpr.class, tree.getLeft().getClass());
         FieldSelectExpr fsExpr = (FieldSelectExpr) tree.getLeft();
         VariableExpr expr = (VariableExpr) fsExpr.getExpr();
-        assertEquals(Type.FLOAT4, expr.getResultType());
+        assertEquals(Types.FLOAT4, expr.getResultType());
         assertEquals("r", fsExpr.getFields());
         assertEquals("color", expr.getVariable().getName());
         assertEquals(LiteralExpr.class, tree.getRight().getClass());
@@ -111,12 +111,12 @@ public class AssignmentExprTest extends ParserBase {
     private BinaryExpr parseTreeFor(String text) throws RecognitionException {
         JSLParser parser = parserOver(text);
         SymbolTable st = parser.getSymbolTable();
-        st.declareVariable("foo", Type.FLOAT, null);
-        st.declareVariable("readonly", Type.FLOAT, Qualifier.CONST);
+        st.declareVariable("foo", Types.FLOAT, null);
+        st.declareVariable("readonly", Types.FLOAT, Qualifier.CONST);
         // trick test into thinking main() function is currently in
         // scope so that we can test core variables such as color and pos0
         st.enterFrame();
-        st.declareFunction("main", Type.VOID, null);
+        st.declareFunction("main", Types.VOID, null);
         return (BinaryExpr)parser.assignment_expression();
     }
 }

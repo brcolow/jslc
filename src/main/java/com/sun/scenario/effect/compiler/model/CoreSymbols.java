@@ -30,7 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import static com.sun.scenario.effect.compiler.model.Precision.*;
-import static com.sun.scenario.effect.compiler.model.Type.*;
+import static com.sun.scenario.effect.compiler.model.Types.*;
 
 /**
  * Maintains the sets of core (built-in) functions and variables.
@@ -180,7 +180,7 @@ public class CoreSymbols {
             }
             paramList.add(new Param((String)params[i+1], (Type)params[i]));
         }
-        funcs.add(new Function(name, returnType, paramList));
+        funcs.add(new Function(name, returnType, paramList, false));
     }
 
     private static void declareOverloadsSimple(String name) {

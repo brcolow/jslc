@@ -142,9 +142,9 @@ field_selection returns [String fields]
 
 primary_expression returns [Expr expr]
         : IDENTIFIER    { $expr = tm.variable($IDENTIFIER.text); }
-        | INTCONSTANT   { $expr = tm.literal(Type.INT, Integer.valueOf($INTCONSTANT.text)); }
-        | FLOATCONSTANT { $expr = tm.literal(Type.FLOAT, Float.valueOf($FLOATCONSTANT.text)); }
-        | BOOLCONSTANT  { $expr = tm.literal(Type.BOOL, Boolean.valueOf($BOOLCONSTANT.text)); }
+        | INTCONSTANT   { $expr = tm.literal(Types.INT, Integer.valueOf($INTCONSTANT.text)); }
+        | FLOATCONSTANT { $expr = tm.literal(Types.FLOAT, Float.valueOf($FLOATCONSTANT.text)); }
+        | BOOLCONSTANT  { $expr = tm.literal(Types.BOOL, Boolean.valueOf($BOOLCONSTANT.text)); }
         | LEFT_PAREN e=expression RIGHT_PAREN { $expr = tm.parenExpr($e.expr); }
         ;
 

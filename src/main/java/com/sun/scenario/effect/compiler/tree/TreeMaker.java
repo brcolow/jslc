@@ -29,16 +29,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import com.sun.scenario.effect.compiler.model.BaseType;
-import com.sun.scenario.effect.compiler.model.BinaryOpType;
-import com.sun.scenario.effect.compiler.model.Function;
-import com.sun.scenario.effect.compiler.model.Qualifier;
-import com.sun.scenario.effect.compiler.model.SymbolTable;
-import com.sun.scenario.effect.compiler.model.Type;
-import com.sun.scenario.effect.compiler.model.UnaryOpType;
-import com.sun.scenario.effect.compiler.model.Variable;
 
-import static com.sun.scenario.effect.compiler.model.Type.*;
+import com.sun.scenario.effect.compiler.model.*;
+
+import static com.sun.scenario.effect.compiler.model.Types.*;
 
 /**
  */
@@ -149,7 +143,7 @@ public class TreeMaker {
     }
 
     public ArrayAccessExpr arrayAccess(Expr expr, Expr index) {
-        if (index.getResultType() != Type.INT) {
+        if (index.getResultType() != Types.INT) {
             throw new RuntimeException("Array index must be an integer");
         }
         return new ArrayAccessExpr(expr, index);
@@ -202,14 +196,14 @@ public class TreeMaker {
     }
 
     public WhileStmt whileStmt(Expr cond, Stmt stmt) {
-        if (cond.getResultType() != Type.BOOL) {
+        if (cond.getResultType() != Types.BOOL) {
             throw new RuntimeException("Condition for 'while' loop must be a boolean expression");
         }
         return new WhileStmt(cond, stmt);
     }
 
     public DoWhileStmt doWhileStmt(Stmt stmt, Expr expr) {
-        if (expr.getResultType() != Type.BOOL) {
+        if (expr.getResultType() != Types.BOOL) {
             throw new RuntimeException("Condition for 'do/while' loop must be a boolean expression");
         }
         return new DoWhileStmt(stmt, expr);
@@ -218,7 +212,7 @@ public class TreeMaker {
     public ForStmt forStmt(Stmt init, Expr cond, Expr expr, Stmt stmt,
                            int unrollMax, int unrollCheck)
     {
-        if (cond != null && cond.getResultType() != Type.BOOL) {
+        if (cond != null && cond.getResultType() != Types.BOOL) {
             throw new RuntimeException("Condition for 'for' loop must be a boolean expression");
         }
         if (expr != null && expr.getResultType().isVector()) {

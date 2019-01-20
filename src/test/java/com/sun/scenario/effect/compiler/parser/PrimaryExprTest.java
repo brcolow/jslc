@@ -27,6 +27,7 @@ package com.sun.scenario.effect.compiler.parser;
 
 import com.sun.scenario.effect.compiler.JSLParser;
 import com.sun.scenario.effect.compiler.model.Type;
+import com.sun.scenario.effect.compiler.model.Types;
 import com.sun.scenario.effect.compiler.tree.Expr;
 import com.sun.scenario.effect.compiler.tree.LiteralExpr;
 import com.sun.scenario.effect.compiler.tree.ParenExpr;
@@ -100,7 +101,7 @@ public class PrimaryExprTest extends ParserBase {
 
     private Expr parseTreeFor(String text) throws RecognitionException {
         JSLParser parser = parserOver(text);
-        parser.getSymbolTable().declareVariable("foo", Type.INT, null);
+        parser.getSymbolTable().declareVariable("foo", Types.INT, null);
         return parser.primary_expression();
     }
 

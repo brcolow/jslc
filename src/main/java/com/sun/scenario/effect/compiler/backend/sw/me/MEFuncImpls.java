@@ -37,7 +37,7 @@ import com.sun.scenario.effect.compiler.tree.Expr;
 import com.sun.scenario.effect.compiler.tree.VariableExpr;
 
 import static com.sun.scenario.effect.compiler.backend.sw.me.MEBackend.*;
-import static com.sun.scenario.effect.compiler.model.Type.*;
+import static com.sun.scenario.effect.compiler.model.Types.*;
 
 /**
  * Contains the C/fixed-point implementations for all core (built-in) functions.

@@ -36,8 +36,8 @@ import com.sun.scenario.effect.compiler.tree.ProgramUnit;
  */
 public class ES2Backend extends GLSLBackend {
 
-    public ES2Backend(JSLParser parser, ProgramUnit program) {
-        super(parser, program);
+    public ES2Backend(JSLParser parser) {
+        super(parser);
     }
 
     // GLSL v1.10 no longer has gl_TexCoord*; these are now passed in

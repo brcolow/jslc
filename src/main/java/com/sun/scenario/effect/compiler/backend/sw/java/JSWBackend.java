@@ -32,10 +32,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import com.sun.scenario.effect.compiler.JSLParser;
-import com.sun.scenario.effect.compiler.model.BaseType;
-import com.sun.scenario.effect.compiler.model.Qualifier;
-import com.sun.scenario.effect.compiler.model.Type;
-import com.sun.scenario.effect.compiler.model.Variable;
+import com.sun.scenario.effect.compiler.model.*;
 import com.sun.scenario.effect.compiler.tree.FuncDef;
 import com.sun.scenario.effect.compiler.tree.ProgramUnit;
 import com.sun.scenario.effect.compiler.tree.TreeScanner;
@@ -138,7 +135,7 @@ public class JSWBackend extends TreeScanner {
                 }
             } else if (v.getQualifier() == Qualifier.PARAM && bt == BaseType.SAMPLER) {
                 int i = v.getReg();
-                if (t == Type.FSAMPLER) {
+                if (t == Types.FSAMPLER) {
                     samplers.append("FloatMap src" + i + " = (FloatMap)getSamplerData(" + i + ");\n");
                     samplers.append("int src" + i + "x = 0;\n");
                     samplers.append("int src" + i + "y = 0;\n");
@@ -151,7 +148,7 @@ public class JSWBackend extends TreeScanner {
                     // TODO: for now, assume [0,0,1,1]
                     srcRects.append("float[] src" + i + "Rect = new float[] {0,0,1,1};\n");
                 } else {
-                    if (t == Type.LSAMPLER) {
+                    if (t == Types.LSAMPLER) {
                         samplers.append("HeapImage src" + i + " = (HeapImage)inputs[" + i + "].getUntransformedImage();\n");
                     } else {
                         samplers.append("HeapImage src" + i + " = (HeapImage)inputs[" + i + "].getTransformedImage(dstBounds);\n");
@@ -170,7 +167,7 @@ public class JSWBackend extends TreeScanner {
                     samplers.append("src" + i + "y, ");
                     samplers.append("src" + i + "w, ");
                     samplers.append("src" + i + "h);\n");
-                    if (t == Type.LSAMPLER) {
+                    if (t == Types.LSAMPLER) {
                         samplers.append("Rectangle src" + i + "InputBounds = inputs[" + i + "].getUntransformedBounds();\n");
                         samplers.append("BaseTransform src" + i + "Transform = inputs[" + i + "].getTransform();\n");
                     } else {
@@ -180,7 +177,7 @@ public class JSWBackend extends TreeScanner {
                     samplers.append("setInputBounds(" + i + ", src" + i + "InputBounds);\n");
                     samplers.append("setInputNativeBounds(" + i + ", src" + i + "Bounds);\n");
 
-                    if (t == Type.LSAMPLER) {
+                    if (t == Types.LSAMPLER) {
                         samplers.append("float " + v.getName() + "_vals[] = new float[4];\n");
                     }
 

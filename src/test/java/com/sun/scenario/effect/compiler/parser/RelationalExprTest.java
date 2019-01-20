@@ -28,6 +28,7 @@ package com.sun.scenario.effect.compiler.parser;
 import com.sun.scenario.effect.compiler.JSLParser;
 import com.sun.scenario.effect.compiler.model.BinaryOpType;
 import com.sun.scenario.effect.compiler.model.Type;
+import com.sun.scenario.effect.compiler.model.Types;
 import com.sun.scenario.effect.compiler.tree.BinaryExpr;
 import org.antlr.runtime.RecognitionException;
 import org.junit.Test;
@@ -67,7 +68,7 @@ public class RelationalExprTest extends ParserBase {
 
     private BinaryExpr parseTreeFor(String text) throws RecognitionException {
         JSLParser parser = parserOver(text);
-        parser.getSymbolTable().declareVariable("foo", Type.INT, null);
+        parser.getSymbolTable().declareVariable("foo", Types.INT, null);
         return (BinaryExpr)parser.relational_expression();
     }
 }

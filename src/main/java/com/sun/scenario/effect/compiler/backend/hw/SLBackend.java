@@ -26,13 +26,7 @@
 package com.sun.scenario.effect.compiler.backend.hw;
 
 import com.sun.scenario.effect.compiler.JSLParser;
-import com.sun.scenario.effect.compiler.model.BinaryOpType;
-import com.sun.scenario.effect.compiler.model.Function;
-import com.sun.scenario.effect.compiler.model.Param;
-import com.sun.scenario.effect.compiler.model.Precision;
-import com.sun.scenario.effect.compiler.model.Qualifier;
-import com.sun.scenario.effect.compiler.model.Type;
-import com.sun.scenario.effect.compiler.model.Variable;
+import com.sun.scenario.effect.compiler.model.*;
 import com.sun.scenario.effect.compiler.tree.ArrayAccessExpr;
 import com.sun.scenario.effect.compiler.tree.BinaryExpr;
 import com.sun.scenario.effect.compiler.tree.BreakStmt;
@@ -72,9 +66,8 @@ public abstract class SLBackend extends TreeScanner {
     protected boolean isVertexColorReferenced;
     protected int maxTexCoordIndex = -1;
 
-    protected SLBackend(JSLParser parser, ProgramUnit program) {
+    protected SLBackend(JSLParser parser) {
         this.parser = parser;
-        scan(program);
     }
 
     protected final void output(String s) {
@@ -227,7 +220,7 @@ public abstract class SLBackend extends TreeScanner {
                 if (left instanceof VariableExpr) {
                     VariableExpr vexpr = (VariableExpr)left;
                     Variable var = vexpr.getVariable();
-                    if (var.getType() != Type.INT) {
+                    if (var.getType() != Types.INT) {
                         throw new RuntimeException("Condition LHS must be integer variable in order to unroll 'for' loop (for now)");
                     }
                     unrollVar = var;

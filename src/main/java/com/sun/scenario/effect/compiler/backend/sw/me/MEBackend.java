@@ -32,10 +32,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import com.sun.scenario.effect.compiler.JSLParser;
-import com.sun.scenario.effect.compiler.model.BaseType;
-import com.sun.scenario.effect.compiler.model.Qualifier;
-import com.sun.scenario.effect.compiler.model.Type;
-import com.sun.scenario.effect.compiler.model.Variable;
+import com.sun.scenario.effect.compiler.model.*;
 import com.sun.scenario.effect.compiler.tree.FuncDef;
 import com.sun.scenario.effect.compiler.tree.ProgramUnit;
 import com.sun.scenario.effect.compiler.tree.TreeScanner;
@@ -179,7 +176,7 @@ public class MEBackend extends TreeScanner {
                 }
             } else if (v.getQualifier() == Qualifier.PARAM && bt == BaseType.SAMPLER) {
                 int i = v.getReg();
-                if (t == Type.FSAMPLER) {
+                if (t == Types.FSAMPLER) {
                     samplers.append("FloatMap src" + i + " = (FloatMap)getSamplerData(" + i + ");\n");
                     samplers.append("int src" + i + "x = 0;\n");
                     samplers.append("int src" + i + "y = 0;\n");
@@ -219,7 +216,7 @@ public class MEBackend extends TreeScanner {
                     samplers.append("setInputBounds(" + i + ", inputs[" + i + "].getBounds());\n");
                     samplers.append("setInputNativeBounds(" + i + ", src" + i + "Bounds);\n");
 
-                    if (t == Type.LSAMPLER) {
+                    if (t == Types.LSAMPLER) {
                         arrayGet.append("float " + vname + "_vals[4];\n");
                     }
 

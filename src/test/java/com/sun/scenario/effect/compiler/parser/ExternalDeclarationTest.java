@@ -27,11 +27,7 @@ package com.sun.scenario.effect.compiler.parser;
 
 import java.util.List;
 import com.sun.scenario.effect.compiler.JSLParser;
-import com.sun.scenario.effect.compiler.model.Function;
-import com.sun.scenario.effect.compiler.model.Param;
-import com.sun.scenario.effect.compiler.model.Qualifier;
-import com.sun.scenario.effect.compiler.model.Type;
-import com.sun.scenario.effect.compiler.model.Variable;
+import com.sun.scenario.effect.compiler.model.*;
 import com.sun.scenario.effect.compiler.tree.ExtDecl;
 import com.sun.scenario.effect.compiler.tree.FuncDef;
 import com.sun.scenario.effect.compiler.tree.VarDecl;
@@ -50,7 +46,7 @@ public class ExternalDeclarationTest extends ParserBase {
         Variable var = d.getVariable();
         assertNotNull(var);
         assertEquals(Qualifier.PARAM, var.getQualifier());
-        assertEquals(Type.FLOAT4, var.getType());
+        assertEquals(Types.FLOAT4, var.getType());
         assertEquals("foo", var.getName());
         assertNull(d.getInit());
     }
@@ -66,7 +62,7 @@ public class ExternalDeclarationTest extends ParserBase {
         Variable var = d.getVariable();
         assertNotNull(var);
         assertEquals(Qualifier.PARAM, var.getQualifier());
-        assertEquals(Type.FLOAT4, var.getType());
+        assertEquals(Types.FLOAT4, var.getType());
         assertEquals("foo", var.getName());
         assertNull(d.getInit());
         tree = decls.get(1);
@@ -75,7 +71,7 @@ public class ExternalDeclarationTest extends ParserBase {
         var = d.getVariable();
         assertNotNull(var);
         assertEquals(Qualifier.PARAM, var.getQualifier());
-        assertEquals(Type.FLOAT4, var.getType());
+        assertEquals(Types.FLOAT4, var.getType());
         assertEquals("bar", var.getName());
         assertNull(d.getInit());
     }
@@ -87,7 +83,7 @@ public class ExternalDeclarationTest extends ParserBase {
         FuncDef d = (FuncDef)tree;
         Function func = d.getFunction();
         assertNotNull(func);
-        assertEquals(Type.VOID, func.getReturnType());
+        assertEquals(Types.VOID, func.getReturnType());
         assertEquals("test", func.getName());
         List<Param> params = func.getParams();
         assertNotNull(params);
@@ -102,7 +98,7 @@ public class ExternalDeclarationTest extends ParserBase {
         FuncDef d = (FuncDef)tree;
         Function func = d.getFunction();
         assertNotNull(func);
-        assertEquals(Type.VOID, func.getReturnType());
+        assertEquals(Types.VOID, func.getReturnType());
         assertEquals(func.getName(), "test");
         List<Param> params = func.getParams();
         assertNotNull(params);
@@ -117,7 +113,7 @@ public class ExternalDeclarationTest extends ParserBase {
         FuncDef d = (FuncDef)tree;
         Function func = d.getFunction();
         assertNotNull(func);
-        assertEquals(Type.VOID, func.getReturnType());
+        assertEquals(Types.VOID, func.getReturnType());
         assertEquals("test", func.getName());
         List<Param> params = func.getParams();
         assertNotNull(params);

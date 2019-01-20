@@ -29,10 +29,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Map;
 import com.sun.scenario.effect.compiler.JSLParser;
-import com.sun.scenario.effect.compiler.model.BaseType;
-import com.sun.scenario.effect.compiler.model.Qualifier;
-import com.sun.scenario.effect.compiler.model.Type;
-import com.sun.scenario.effect.compiler.model.Variable;
+import com.sun.scenario.effect.compiler.model.*;
 import com.sun.scenario.effect.compiler.tree.GlueBlock;
 import com.sun.scenario.effect.compiler.tree.ProgramUnit;
 import com.sun.scenario.effect.compiler.tree.TreeScanner;
@@ -78,7 +75,7 @@ public class PrismBackend extends TreeScanner {
                 String vname = v.getName();
                 if (v.getType().getBaseType() == BaseType.SAMPLER) {
                     samplerInit.append("samplers.put(\"" + vname + "\", " + v.getReg() + ");\n");
-                    if (v.getType() == Type.LSAMPLER || v.getType() == Type.FSAMPLER) {
+                    if (v.getType() == Types.LSAMPLER || v.getType() == Types.FSAMPLER) {
                         samplerLinear.append("case " + v.getReg() + ":\n");
                         samplerLinear.append("    return true;\n");
                     }

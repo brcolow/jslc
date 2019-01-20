@@ -27,6 +27,7 @@ package com.sun.scenario.effect.compiler;
 
 import com.sun.scenario.effect.compiler.backend.hw.ES2Backend;
 import com.sun.scenario.effect.compiler.backend.hw.HLSLBackend;
+import com.sun.scenario.effect.compiler.backend.hw.ShaderModel;
 import com.sun.scenario.effect.compiler.backend.prism.PrismBackend;
 import com.sun.scenario.effect.compiler.backend.sw.java.JSWBackend;
 import com.sun.scenario.effect.compiler.backend.sw.me.MEBackend;
@@ -196,7 +197,8 @@ public class JSLC {
             File outFile = jslcinfo.getOutputFile(OUT_D3D);
             if (jslcinfo.force || outOfDate(outFile, sourceTime)) {
                 if (pinfo == null) pinfo = getParserInfo(stream);
-                HLSLBackend hlslBackend = new HLSLBackend(pinfo.parser, pinfo.program);
+                HLSLBackend hlslBackend = new HLSLBackend(pinfo.parser, ShaderModel.SM3);
+                hlslBackend.scan(pinfo.program);
                 write(hlslBackend.getShader(), outFile);
             }
         }
@@ -205,8 +207,8 @@ public class JSLC {
             File outFile = jslcinfo.getOutputFile(OUT_D3D11);
             if (jslcinfo.force || outOfDate(outFile, sourceTime)) {
                 if (pinfo == null) pinfo = getParserInfo(stream);
-                // FIXME: Either extend HLSLBackend to handle ps5+ or make a new class for it
-                HLSLBackend hlslBackend = new HLSLBackend(pinfo.parser, pinfo.program);
+                HLSLBackend hlslBackend = new HLSLBackend(pinfo.parser, ShaderModel.SM5_1);
+                hlslBackend.scan(pinfo.program);
                 write(hlslBackend.getShader(), outFile);
             }
         }
@@ -215,7 +217,8 @@ public class JSLC {
             File outFile = jslcinfo.getOutputFile(OUT_ES2);
             if (jslcinfo.force || outOfDate(outFile, sourceTime)) {
                 if (pinfo == null) pinfo = getParserInfo(stream);
-                ES2Backend es2Backend = new ES2Backend(pinfo.parser, pinfo.program);
+                ES2Backend es2Backend = new ES2Backend(pinfo.parser);
+                es2Backend.scan(pinfo.program);
                 write(es2Backend.getShader(), outFile);
             }
         }

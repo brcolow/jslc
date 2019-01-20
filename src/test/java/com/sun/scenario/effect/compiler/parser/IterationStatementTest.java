@@ -27,6 +27,7 @@ package com.sun.scenario.effect.compiler.parser;
 
 import com.sun.scenario.effect.compiler.JSLParser;
 import com.sun.scenario.effect.compiler.model.Type;
+import com.sun.scenario.effect.compiler.model.Types;
 import com.sun.scenario.effect.compiler.tree.BinaryExpr;
 import com.sun.scenario.effect.compiler.tree.DoWhileStmt;
 import com.sun.scenario.effect.compiler.tree.ExprStmt;
@@ -109,8 +110,8 @@ public class IterationStatementTest extends ParserBase {
 
     private Stmt parseTreeFor(String text) throws RecognitionException {
         JSLParser parser = parserOver(text);
-        parser.getSymbolTable().declareVariable("i", Type.INT, null);
-        parser.getSymbolTable().declareVariable("j", Type.INT, null);
+        parser.getSymbolTable().declareVariable("i", Types.INT, null);
+        parser.getSymbolTable().declareVariable("j", Types.INT, null);
         return parser.iteration_statement();
     }
 }

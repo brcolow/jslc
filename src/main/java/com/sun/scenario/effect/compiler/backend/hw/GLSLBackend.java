@@ -36,8 +36,8 @@ import com.sun.scenario.effect.compiler.tree.ProgramUnit;
  */
 public class GLSLBackend extends SLBackend {
 
-    public GLSLBackend(JSLParser parser, ProgramUnit program) {
-        super(parser, program);
+    public GLSLBackend(JSLParser parser) {
+        super(parser);
     }
 
     private static final Map<String, String> qualMap = new HashMap<String, String>();

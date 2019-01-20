@@ -27,6 +27,7 @@ package com.sun.scenario.effect.compiler.parser;
 
 import com.sun.scenario.effect.compiler.JSLParser;
 import com.sun.scenario.effect.compiler.model.Type;
+import com.sun.scenario.effect.compiler.model.Types;
 import com.sun.scenario.effect.compiler.model.UnaryOpType;
 import com.sun.scenario.effect.compiler.tree.LiteralExpr;
 import com.sun.scenario.effect.compiler.tree.UnaryExpr;
@@ -103,8 +104,8 @@ public class UnaryExprTest extends PrimaryExprTest {
 
     private UnaryExpr parseTreeFor(String text) throws RecognitionException {
         JSLParser parser = parserOver(text);
-        parser.getSymbolTable().declareVariable("foo", Type.INT, null);
-        parser.getSymbolTable().declareVariable("vec", Type.INT3, null);
+        parser.getSymbolTable().declareVariable("foo", Types.INT, null);
+        parser.getSymbolTable().declareVariable("vec", Types.INT3, null);
         return (UnaryExpr)parser.unary_expression();
     }
 
