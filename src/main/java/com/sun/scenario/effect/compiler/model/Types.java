@@ -8,6 +8,8 @@ public class Types {
     public static final Type FLOAT3 = new Type(BaseType.FLOAT, "float3", 3);
     public static final Type FLOAT4 = new Type(BaseType.FLOAT, "float4", 4);
     public static final Type FLOAT2X2 = new MatrixType(BaseType.FLOAT, "float2x2", 2, 2);
+    public static final Type FLOAT3X3 = new MatrixType(BaseType.FLOAT, "float3x3", 3, 3);
+    public static final Type FLOAT4X4 = new MatrixType(BaseType.FLOAT, "float4x4", 4, 4);
     public static final Type INT = new Type(BaseType.INT, "int", 1);
     public static final Type INT2 = new Type(BaseType.INT, "int2", 2);
     public static final Type INT3 = new Type(BaseType.INT, "int3", 3);
